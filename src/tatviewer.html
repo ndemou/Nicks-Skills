@@ -503,15 +503,12 @@
     }
 
     .task-card.navigation-target {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 22%, transparent), var(--shadow);
-      transform: translateY(-1px);
-      animation: navigation-highlight 2.4s ease-out;
+      animation: navigation-highlight 4.8s ease-out;
     }
 
     @keyframes navigation-highlight {
       0%, 38% {
-        background-color: var(--warning-soft);
+        background-color: #FFFF50;
       }
 
       100% {
@@ -1237,7 +1234,7 @@
 
       .task-card.navigation-target {
         animation: none;
-        background-color: var(--warning-soft);
+        background-color: #FFFF50;
       }
     }
 
@@ -2097,7 +2094,7 @@ __TATVIEWER_MERMAID_LICENSE__
         window.setTimeout(() => {
           const wrapper = card.closest(".task-card");
           if (wrapper) wrapper.classList.remove("navigation-target");
-        }, 2400);
+        }, 4800);
       });
     }
 

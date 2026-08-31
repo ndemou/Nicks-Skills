@@ -856,8 +856,10 @@ mod tests {
         assert!(html.contains("const graphTasks = tasks.filter"));
         assert!(html.contains("id=\"graph-jump\""));
         assert!(html.contains("<details class=\"graph-panel\" id=\"graph\" open"));
-        assert!(html.contains("animation: navigation-highlight 2.4s ease-out"));
-        assert!(html.contains("background-color: var(--warning-soft)"));
+        assert!(html.contains("animation: navigation-highlight 4.8s ease-out"));
+        assert!(html.contains("background-color: #FFFF50"));
+        assert!(html.contains("}, 4800);"));
+        assert!(!html.contains("box-shadow: 0 0 0 4px color-mix"));
         assert!(html.contains("overflow-y: visible"));
         assert!(html.contains("max-height: none"));
         assert!(html.contains("wrappingWidth: 160"));

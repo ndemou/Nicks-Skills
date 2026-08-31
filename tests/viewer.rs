@@ -152,8 +152,10 @@ fn exports_a_self_contained_default_dashboard_with_a_navigable_family_graph() {
     assert!(html.contains("history.pushState(null, \"\", \"#graph\")"));
     assert!(html.contains("window.location.hash === \"#graph\""));
     assert!(html.contains("focusGraph(false)"));
-    assert!(html.contains("animation: navigation-highlight 2.4s ease-out"));
-    assert!(html.contains("background-color: var(--warning-soft)"));
+    assert!(html.contains("animation: navigation-highlight 4.8s ease-out"));
+    assert!(html.contains("background-color: #FFFF50"));
+    assert!(html.contains("}, 4800);"));
+    assert!(!html.contains("box-shadow: 0 0 0 4px color-mix"));
     assert!(html.contains("overflow-y: visible"));
     assert!(html.contains("max-height: none"));
     assert!(html.contains("nodeSpacing: 18"));
