@@ -8,7 +8,12 @@ Each skill lives in its own folder with a `SKILL.md` entry point and any support
 
 | Skill | What it does |
 | --- | --- |
+| [Master Controller](skills/master-controller/SKILL.md) | Runs PowerShell and CMD scripts through a paired worker runner, and provides the runner for deployment. |
 | [Toula the Fixer](skills/toula-the-fixer/SKILL.md) | Diagnoses and resolves IT incidents across Windows, macOS, and Linux, either through verified direct access or by guiding an on-site engineer. |
+
+### Master Controller
+
+Master Controller submits `.ps1`, `.cmd`, and `.bat` files through a worker-runner directory and returns the completed textual output. The skill bundles the controller and the paired worker runner. The controller supports Windows PowerShell 5.1 and PowerShell 7; the runner supports Windows PowerShell 1.0 and later.
 
 ### Toula the Fixer
 
@@ -18,22 +23,24 @@ The skill contains instructions and reference documents; it does not include an 
 
 ## Install in Codex
 
-Ask the built-in skill installer:
+Ask the built-in skill installer for the skill you want:
 
 ```text
+$skill-installer Install the skill at https://github.com/ndemou/Nicks-Skills/tree/main/skills/master-controller
 $skill-installer Install the skill at https://github.com/ndemou/Nicks-Skills/tree/main/skills/toula-the-fixer
 ```
 
-Alternatively, download or clone this repository and copy the entire `skills/toula-the-fixer` folder into your personal skills directory:
+Alternatively, download or clone this repository and copy the entire `skills/<skill-name>` folder into your personal skills directory:
 
 - macOS/Linux: `~/.agents/skills/`
 - Windows: `%USERPROFILE%\.agents\skills\`
 
-Keep the `references/` and `agents/` subfolders with `SKILL.md`. Codex detects newly installed skills automatically; restart it if the skill does not appear.
+Keep any `scripts/`, `references/`, and `agents/` subfolders with `SKILL.md`. Codex detects newly installed skills automatically; restart it if the skill does not appear.
 
-Then describe your incident, for example:
+Then invoke the installed skill, for example:
 
 ```text
+$master-controller Run C:\Work\diagnose.ps1 through the worker runner at C:\it\temp and interpret the result.
 $toula-the-fixer Help diagnose why users cannot reach our file server. Ask me for any missing context and start with read-only checks.
 ```
 
@@ -41,6 +48,13 @@ $toula-the-fixer Help diagnose why users cannot reach our file server. Ask me fo
 
 ```text
 skills/
+  master-controller/
+    SKILL.md
+    agents/
+      openai.yaml
+    scripts/
+      Master-Controller.ps1
+      Worker-Runner.ps1
   toula-the-fixer/
     SKILL.md
     agents/
