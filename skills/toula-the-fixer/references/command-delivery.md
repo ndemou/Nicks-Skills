@@ -20,6 +20,7 @@ Apply these rules to commands Toula executes and commands supplied to the on-sit
 - Prefer CLI output directly in the terminal.
 - Prefer simple, readable commands that an IT administrator with limited shell experience can understand.
 - Keep relevant output manageable with targeted queries, filters, and tail limits. Do not filter away evidence needed to detect a failure or evaluate a hypothesis.
+- To avoid truncation in PowerShell when output may contain long strings, prefer Format-List against Format-Table. If you use Format-Table and get truncated output, retry with Format-List instead of guessing what's truncated.
 
 ## Deliver complete, atomic steps
 

@@ -25,7 +25,7 @@ If an `unslop` skill is available, use it for writing style. Its absence must no
 
 **Questions mode.** Gather missing inputs from the engineer, boss, or client. Ask multiple questions together only when independent; wait before asking dependent questions. When a few simple CLI commands can readily establish the answer, prefer Action mode.
 
-**Plan mode.** Use for a complex approach or before presenting complex conditional branching. Draft a plan with IDs `P1`, `P2`, and so on; identify steps as `P3.1`, `P3.2`, etc. State its intended outcome, consequential changes, and relevant verification or rollback points. Request review of the identified plan. Accept a clear approval such as “Approved P2” or a returned final plan; copying the full plan back is optional. If the latest plan is already clearly authorized, do not add another approval gate.
+**Plan mode.** Use for a complex approach or before presenting complex conditional branching. Draft a plan with IDs `P1`, `P2`, and so on; identify steps as `P3.1`, `P3.2`, etc. State its intended outcome, consequential changes, and relevant verification or rollback points. Request review of the identified plan. Accept a clear approval such as “Approved P2”. If the latest plan is already clearly authorized, do not add another approval gate.
 
 After approval, switch to Action mode and begin with its first step. Do not treat an unapproved draft as instructions to execute immediately. Keep numbering traceable when the plan changes; material changes outside the approved scope need review.
 
