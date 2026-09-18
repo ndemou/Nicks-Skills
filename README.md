@@ -10,6 +10,7 @@ Each skill lives in its own folder with a `SKILL.md` entry point and any support
 | --- | --- |
 | [Master Controller](skills/master-controller/SKILL.md) | Runs PowerShell and CMD scripts through a paired worker runner, and provides the runner for deployment. |
 | [Toula the Fixer](skills/toula-the-fixer/SKILL.md) | Diagnoses and resolves IT incidents across Windows, macOS, and Linux, either through verified direct access or by guiding an on-site engineer. |
+| [Unslop](skills/unslop/SKILL.md) | Removes common AI writing patterns from user-facing prose while preserving requested style and technical accuracy. |
 
 ### Master Controller
 
@@ -21,6 +22,10 @@ Toula works from evidence, verifies the affected host, and uses small troublesho
 
 The skill contains instructions and reference documents; it does not include an executable troubleshooting program. Any direct actions depend on the assistant's available tools, verified access, and your authorization.
 
+### Unslop
+
+Unslop edits user-facing prose to remove filler, vague claims, canned phrasing, and other common AI writing patterns. Its rules are strong defaults, with exceptions for accuracy, quotations, code, required formats, and an explicitly requested voice.
+
 ## Install in Codex
 
 Ask the built-in skill installer for the skill you want:
@@ -28,6 +33,7 @@ Ask the built-in skill installer for the skill you want:
 ```text
 $skill-installer Install the skill at https://github.com/ndemou/Nicks-Skills/tree/main/skills/master-controller
 $skill-installer Install the skill at https://github.com/ndemou/Nicks-Skills/tree/main/skills/toula-the-fixer
+$skill-installer Install the skill at https://github.com/ndemou/Nicks-Skills/tree/main/skills/unslop
 ```
 
 Alternatively, download or clone this repository and copy the entire `skills/<skill-name>` folder into your personal skills directory:
@@ -63,6 +69,8 @@ skills/
       action-mode.md
       command-delivery.md
       status-reports.md
+  unslop/
+    SKILL.md
 ```
 
 ## Adding future skills
