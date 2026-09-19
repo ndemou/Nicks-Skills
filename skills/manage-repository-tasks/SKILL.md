@@ -10,6 +10,8 @@ Do not operate on task files manually when `tat` supports the operation (e.g. co
 
 The binary is fully self-documenting. Run `tat --help` for basic help, `tat help <command>` for command-specific help, `tat guide` for orientation and the recommended workflow, or `tat reference` for the complete reference manual.
 
+Task types, list modes and their aliases, and `--color` values are case-insensitive. For example, `--type BUG`, `--type Bug`, and `--type bug` all select `BUG`; filenames and JSON retain canonical values.
+
 ## Use the task model
 
 Each task is a Markdown file with this filename format:

@@ -187,6 +187,138 @@ fn creates_repository_local_ids_and_omits_empty_relationship_fields() {
 }
 
 #[test]
+fn task_type_values_accept_uppercase_and_mixed_case_without_changing_task_text() {
+    let repo = repository();
+    let title = "Keep API and MiXeD title Case";
+    let body = "# API Details\n\nPreserve MiXeD body Case and BUG text.";
+
+    for (canonical, mixed) in [
+        ("BUG", "bUg"),
+        ("FEATURE", "FeAtUrE"),
+        ("TASK", "tAsK"),
+        ("GATE", "GaTe"),
+    ] {
+        for value in [canonical, mixed] {
+            let path = created_path(
+                repo.path(),
+                &["new", title, "--type", value, "--body", body],
+            );
+            let id = id_from_path(&path);
+            assert_eq!(
+                path.file_name().unwrap().to_str().unwrap(),
+                format!("{id}, p5, {canonical}, {title}.md")
+            );
+            let document = json_success(repo.path(), &["list", "all", "--json"]);
+            let task = json_task(&document, &id);
+            assert_eq!(task["type"], canonical);
+            assert_eq!(task["title"], title);
+            assert_eq!(task["body_markdown"], body);
+
+            let initial_kind = if canonical == "TASK" { "bug" } else { "task" };
+            let original_path = created_path(
+                repo.path(),
+                &["new", title, "--type", initial_kind, "--body", body],
+            );
+            let updated_id = id_from_path(&original_path);
+            let updated_path = created_path(repo.path(), &["set", &updated_id, "-t", value]);
+            assert!(!original_path.exists());
+            assert_eq!(
+                updated_path.file_name().unwrap().to_str().unwrap(),
+                format!("{updated_id}, p5, {canonical}, {title}.md")
+            );
+            let document = json_success(repo.path(), &["list", "all", "--json"]);
+            let task = json_task(&document, &updated_id);
+            assert_eq!(task["type"], canonical);
+            assert_eq!(task["title"], title);
+            assert_eq!(task["body_markdown"], body);
+        }
+    }
+}
+
+#[test]
+fn list_mode_values_and_aliases_accept_uppercase_and_mixed_case() {
+    let repo = repository();
+    let blocked = id_from_path(&created_path(repo.path(), &["new", "Blocked work"]));
+    created_path(repo.path(), &["new", "Ready blocker", "--blocks", &blocked]);
+    let done = id_from_path(&created_path(repo.path(), &["new", "Finished work"]));
+    success(repo.path(), &["done", &done]);
+
+    for (lowercase, mixed) in [
+        ("ready", "ReAdY"),
+        ("unblocked", "UnBlOcKeD"),
+        ("active", "AcTiVe"),
+        ("blocked", "BlOcKeD"),
+        ("not-done", "NoT-DoNe"),
+        ("done", "DoNe"),
+        ("all", "AlL"),
+    ] {
+        let expected = json_success(repo.path(), &["list", lowercase, "--json"]);
+        assert!(!expected["tasks"].as_array().unwrap().is_empty());
+        for value in [lowercase.to_ascii_uppercase(), mixed.to_owned()] {
+            assert_eq!(
+                json_success(repo.path(), &["list", &value, "--json"]),
+                expected,
+                "list mode {value:?} changed the result"
+            );
+        }
+    }
+}
+
+#[test]
+fn color_values_accept_uppercase_and_mixed_case_for_output_and_parse_errors() {
+    let repo = repository();
+    created_path(repo.path(), &["new", "Color case test"]);
+
+    for (lowercase, mixed) in [("auto", "AuTo"), ("always", "AlWaYs"), ("never", "NeVeR")] {
+        let expected = success(repo.path(), &["list", "--color", lowercase]);
+        let (_, expected_error) = failure(repo.path(), &["--color", lowercase, "done"]);
+        assert_eq!(expected.contains("\x1b["), lowercase == "always");
+        assert_eq!(expected_error.contains("\x1b["), lowercase == "always");
+
+        for value in [lowercase.to_ascii_uppercase(), mixed.to_owned()] {
+            assert_eq!(success(repo.path(), &["list", "--color", &value]), expected);
+            let (_, error) = failure(repo.path(), &["--color", &value, "done"]);
+            assert_eq!(error, expected_error);
+            let inline = format!("--color={value}");
+            assert_eq!(success(repo.path(), &[&inline, "list"]), expected);
+            let (_, error) = failure(repo.path(), &[&inline, "done"]);
+            assert_eq!(error, expected_error);
+        }
+    }
+}
+
+#[test]
+fn unknown_enum_values_remain_errors_without_writing_tasks() {
+    let repo = repository();
+    for args in [
+        vec!["new", "Do not create", "--type", "BuGs"],
+        vec!["new", "Do not create", "--color", "RaInBoW"],
+        vec!["list", "ReAdY-IsH"],
+    ] {
+        let (stdout, stderr) = failure(repo.path(), &args);
+        assert!(stdout.is_empty());
+        assert!(stderr.contains("invalid value"), "{stderr}");
+        assert!(!repo.path().join("tasks").exists());
+    }
+
+    let path = created_path(
+        repo.path(),
+        &["new", "Unchanged API Case", "--body", "MiXeD body"],
+    );
+    let id = id_from_path(&path);
+    let original_bytes = fs::read(&path).unwrap();
+    let original_listing = json_success(repo.path(), &["list", "all", "--json"]);
+    let (stdout, stderr) = failure(repo.path(), &["set", &id, "--type", "TaSkS"]);
+    assert!(stdout.is_empty());
+    assert!(stderr.contains("invalid value"), "{stderr}");
+    assert_eq!(fs::read(path).unwrap(), original_bytes);
+    assert_eq!(
+        json_success(repo.path(), &["list", "all", "--json"]),
+        original_listing
+    );
+}
+
+#[test]
 fn extracts_ids_from_filenames_and_paths_without_repository_discovery() {
     let repo = repository();
     let path = created_path(repo.path(), &["new", "Path conversion task"]);

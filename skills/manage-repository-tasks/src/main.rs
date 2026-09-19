@@ -67,6 +67,8 @@ FIND THE RIGHT COMMAND
   Finish             done
   Permanently delete remove --force
 
+  Task types, list modes, and --color values are case-insensitive.
+
 LEARN AND TROUBLESHOOT
   tat help <COMMAND>    More detailed help for a particular command
   tat guide             Orientation and recommended workflow (How To)
@@ -786,7 +788,13 @@ MORE HELP
 )]
 struct Cli {
     /// Control ANSI colors:
-    #[arg(long, global = true, value_enum, default_value = "auto")]
+    #[arg(
+        long,
+        global = true,
+        value_enum,
+        ignore_case = true,
+        default_value = "auto"
+    )]
     color: ColorWhen,
     /// Print help
     #[arg(short = 'h', long = "help", global = true, action = ArgAction::Help)]
@@ -850,7 +858,13 @@ struct NewArgs {
     #[arg(short = 'p', long, default_value = "5")]
     priority: String,
     /// Task type.
-    #[arg(short = 't', long = "type", value_enum, default_value = "task")]
+    #[arg(
+        short = 't',
+        long = "type",
+        value_enum,
+        ignore_case = true,
+        default_value = "task"
+    )]
     kind: KindArg,
     /// Existing parent task ID.
     #[arg(long)]
@@ -893,6 +907,7 @@ struct ListArgs {
     /// Which tasks to list. "unblocked" and "active" alias "ready".
     #[arg(
         value_enum,
+        ignore_case = true,
         default_value = "ready",
         hide_possible_values = true,
         long_help = "Which tasks to list: ready (aliases: unblocked, active), blocked, not-done, done, or all.\nSee MODES below for exact semantics."
@@ -959,7 +974,7 @@ struct SetArgs {
     #[arg(short = 'p', long)]
     priority: Option<String>,
     /// Replace the task type.
-    #[arg(short = 't', long = "type", value_enum)]
+    #[arg(short = 't', long = "type", value_enum, ignore_case = true)]
     kind: Option<KindArg>,
     /// Replace the parent task ID.
     #[arg(long, conflicts_with = "clear_parent")]
