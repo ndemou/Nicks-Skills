@@ -1,0 +1,2271 @@
+<!doctype html>
+<html lang="en" data-include-old-done="__TATVIEWER_INCLUDE_OLD_DONE__" data-recent-mode="__TATVIEWER_RECENT_MODE__" data-recent-value="__TATVIEWER_RECENT_VALUE__">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+  <title>TAT dashboard</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --background: #f4f6f8;
+      --surface: #ffffff;
+      --surface-raised: #ffffff;
+      --surface-muted: #eef1f4;
+      --text: #18212b;
+      --muted: #647180;
+      --border: #d8dee5;
+      --accent: #1769e0;
+      --accent-soft: #e6f0ff;
+      --ready: #137a47;
+      --ready-soft: #ddf5e8;
+      --blocked: #b03a2e;
+      --blocked-soft: #fee9e6;
+      --done: #66717f;
+      --done-soft: #e9edf1;
+      --warning: #9a6200;
+      --warning-soft: #fff2cf;
+      --shadow: 0 8px 24px rgba(20, 32, 48, 0.08);
+      --radius: 14px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --background: #10151b;
+        --surface: #171e26;
+        --surface-raised: #1c2530;
+        --surface-muted: #222c37;
+        --text: #edf2f7;
+        --muted: #a7b2bf;
+        --border: #34404d;
+        --accent: #70a7ff;
+        --accent-soft: #1b365d;
+        --ready: #66d39a;
+        --ready-soft: #183b2b;
+        --blocked: #ff9388;
+        --blocked-soft: #4b2624;
+        --done: #b4bec8;
+        --done-soft: #2c3540;
+        --warning: #ffd178;
+        --warning-soft: #483719;
+        --shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      background: var(--background);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.45;
+    }
+
+    button,
+    input,
+    select {
+      color: inherit;
+      font: inherit;
+    }
+
+    button,
+    a,
+    input,
+    select {
+      outline-offset: 3px;
+    }
+
+    :focus-visible {
+      outline: 3px solid var(--accent);
+    }
+
+    .skip-link {
+      position: fixed;
+      z-index: 100;
+      top: 0.75rem;
+      left: 0.75rem;
+      padding: 0.65rem 0.9rem;
+      border-radius: 8px;
+      background: var(--text);
+      color: var(--surface);
+      transform: translateY(-160%);
+    }
+
+    .skip-link:focus {
+      transform: translateY(0);
+    }
+
+    .app-header {
+      position: sticky;
+      z-index: 20;
+      top: 0;
+      border-bottom: 1px solid var(--border);
+      background: color-mix(in srgb, var(--surface) 94%, transparent);
+      box-shadow: 0 4px 16px rgba(20, 32, 48, 0.04);
+      backdrop-filter: blur(12px);
+    }
+
+    .header-inner,
+    main {
+      width: min(1380px, calc(100% - 2rem));
+      margin-inline: auto;
+    }
+
+    .header-inner {
+      padding: 1rem 0 0.85rem;
+    }
+
+    .heading-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1.5rem;
+    }
+
+    .heading-primary {
+      display: flex;
+      align-items: center;
+      min-width: 0;
+      gap: 0.7rem;
+    }
+
+    .repository-heading {
+      min-width: 0;
+    }
+
+    .graph-jump-button {
+      display: grid;
+      flex: 0 0 auto;
+      width: 3.65rem;
+      height: 3.65rem;
+      place-items: center;
+      padding: 0.35rem;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      background: var(--surface-raised);
+      color: var(--text);
+      box-shadow: var(--shadow);
+      cursor: pointer;
+    }
+
+    .graph-jump-button:hover {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .graph-jump-button svg {
+      width: 2.45rem;
+      height: 2.45rem;
+    }
+
+    .eyebrow {
+      margin: 0 0 0.2rem;
+      color: var(--accent);
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.35rem, 2.5vw, 2rem);
+      line-height: 1.15;
+    }
+
+    .header-result-count {
+      margin: 0.35rem 0 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 800;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(104px, 1fr));
+      gap: 0.5rem;
+      min-width: min(100%, 560px);
+    }
+
+    .filter-stack {
+      display: grid;
+      gap: 0.38rem;
+      min-width: min(100%, 560px);
+    }
+
+    .type-summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.38rem;
+    }
+
+    .summary-button {
+      display: grid;
+      grid-template-columns: auto auto;
+      align-items: baseline;
+      justify-content: center;
+      gap: 0.35rem;
+      min-height: 44px;
+      padding: 0.45rem 0.65rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface-muted);
+      cursor: pointer;
+    }
+
+    .summary-button[aria-pressed="true"],
+    .type-filter-button[aria-pressed="true"] {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .type-filter-button {
+      min-height: 30px;
+      padding: 0.25rem 0.45rem;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--surface-muted);
+      color: var(--muted);
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .summary-count {
+      font-size: 1.15rem;
+      font-weight: 800;
+    }
+
+    .summary-label {
+      color: var(--muted);
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) minmax(150px, 0.3fr) auto;
+      gap: 0.65rem;
+      margin-top: 0.85rem;
+    }
+
+    .control {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .control-icon {
+      position: absolute;
+      z-index: 1;
+      left: 0.62rem;
+      width: 1rem;
+      height: 1rem;
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    input,
+    select,
+    .clear-button,
+    .return-button {
+      min-height: 36px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: var(--surface);
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 0.38rem 0.7rem 0.38rem 2rem;
+    }
+
+    .clear-button,
+    .return-button {
+      align-self: end;
+      padding: 0.35rem 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .clear-button:hover,
+    .return-button:hover {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .navigation-notice {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 0.75rem;
+      padding: 0.55rem 0.75rem;
+      border: 1px solid color-mix(in srgb, var(--warning) 45%, var(--border));
+      border-radius: 9px;
+      background: var(--warning-soft);
+      font-size: 0.86rem;
+    }
+
+    .navigation-message {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    main {
+      padding: 1.1rem 0 4rem;
+    }
+
+    .graph-panel {
+      margin: 1rem 0 0;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface-raised);
+      box-shadow: var(--shadow);
+    }
+
+    .graph-panel > summary {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: baseline;
+      gap: 1rem;
+      padding: 0.62rem 0.8rem;
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    .graph-panel > summary::marker {
+      content: "";
+    }
+
+    .graph-panel > summary::before {
+      content: "▾";
+      color: var(--accent);
+    }
+
+    .graph-panel:not([open]) > summary::before {
+      content: "▸";
+    }
+
+    .graph-legend {
+      color: var(--muted);
+      font-size: 0.75rem;
+      font-weight: 650;
+    }
+
+    .graph-key {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.28rem 0.65rem;
+      padding: 0 0.8rem 0.55rem;
+      color: var(--muted);
+      font-size: 0.7rem;
+      font-weight: 750;
+    }
+
+    .graph-key-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.2rem;
+      white-space: nowrap;
+    }
+
+    .graph-key-shape {
+      color: var(--text);
+      font-size: 0.9rem;
+      line-height: 1;
+    }
+
+    .graph-key-status {
+      padding: 0.04rem 0.38rem;
+      border: 1px solid currentColor;
+      border-radius: 999px;
+      font-size: 0.62rem;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .graph-key-ready {
+      background: var(--ready-soft);
+      color: var(--ready);
+    }
+
+    .graph-key-blocked {
+      background: var(--blocked-soft);
+      color: var(--blocked);
+    }
+
+    .graph-key-done {
+      background: var(--done-soft);
+      color: var(--done);
+    }
+
+    .graph-scroll {
+      overflow-x: auto;
+      overflow-y: visible;
+      max-height: none;
+      border-top: 1px solid var(--border);
+    }
+
+    .task-graph {
+      min-width: 720px;
+      padding: 0.75rem;
+      text-align: center;
+    }
+
+    .task-graph svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      margin-inline: auto;
+    }
+
+    .task-graph .task-graph-link {
+      cursor: pointer;
+    }
+
+    .task-graph-id {
+      font-weight: 850;
+    }
+
+    .task-graph .task-graph-link rect,
+    .task-graph .task-graph-link polygon,
+    .task-graph .task-graph-link path {
+      transition: filter 140ms ease, stroke-width 140ms ease;
+    }
+
+    .task-graph .task-graph-link:hover rect,
+    .task-graph .task-graph-link:hover polygon,
+    .task-graph .task-graph-link:hover path,
+    .task-graph .task-graph-link:focus rect,
+    .task-graph .task-graph-link:focus polygon,
+    .task-graph .task-graph-link:focus path {
+      filter: brightness(0.96);
+      stroke-width: 2.5px !important;
+    }
+
+    .task-graph-message {
+      margin: 0;
+      padding: 1rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .result-count {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 800;
+    }
+
+    .task-list {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0.8rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .task-card {
+      border: 1px solid var(--border);
+      border-left: 5px solid var(--done);
+      border-radius: var(--radius);
+      background: var(--surface-raised);
+      box-shadow: var(--shadow);
+      transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+    }
+
+    .task-card[data-status="ready"] {
+      border-left-color: var(--ready);
+    }
+
+    .task-card[data-status="blocked"] {
+      border-left-color: var(--blocked);
+    }
+
+    .task-card.navigation-target {
+      animation: navigation-highlight 4.8s ease-out;
+    }
+
+    @keyframes navigation-highlight {
+      0%, 38% {
+        background-color: #FFFF50;
+      }
+
+      100% {
+        background-color: var(--surface-raised);
+      }
+    }
+
+    .task-article {
+      padding: 0.9rem 1rem 1rem;
+    }
+
+    .card-topline {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.65rem;
+    }
+
+    .card-id-row,
+    .badges,
+    .task-ref {
+      display: inline-flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .task-id,
+    .task-link {
+      color: var(--accent);
+      font-family: ui-monospace, "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: 0.86rem;
+      font-weight: 800;
+      direction: ltr;
+      unicode-bidi: isolate;
+    }
+
+    .task-link {
+      border-radius: 3px;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 3px;
+    }
+
+    .copy-button {
+      position: relative;
+      width: 28px;
+      min-width: 28px;
+      height: 28px;
+      border: 1px solid transparent;
+      border-radius: 7px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .copy-button:hover {
+      border-color: var(--border);
+      background: var(--surface-muted);
+      color: var(--accent);
+    }
+
+    .copy-button::before,
+    .copy-button::after {
+      content: "";
+      position: absolute;
+      width: 8px;
+      height: 9px;
+      border: 1.5px solid currentColor;
+      border-radius: 2px;
+    }
+
+    .copy-button::before {
+      top: 7px;
+      left: 8px;
+    }
+
+    .copy-button::after {
+      top: 10px;
+      left: 11px;
+      background: var(--surface-raised);
+    }
+
+    .copy-button.copied::before {
+      width: 5px;
+      height: 10px;
+      top: 6px;
+      left: 11px;
+      border-width: 0 2px 2px 0;
+      border-radius: 0;
+      transform: rotate(45deg);
+    }
+
+    .copy-button.copied::after {
+      display: none;
+    }
+
+    .badge,
+    .ref-status,
+    .ref-priority {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 0.15rem 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--surface-muted);
+      color: var(--muted);
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .badge-ready,
+    .ref-status-ready {
+      border-color: color-mix(in srgb, var(--ready) 35%, var(--border));
+      background: var(--ready-soft);
+      color: var(--ready);
+    }
+
+    .badge-blocked,
+    .ref-status-blocked {
+      border-color: color-mix(in srgb, var(--blocked) 35%, var(--border));
+      background: var(--blocked-soft);
+      color: var(--blocked);
+    }
+
+    .badge-done,
+    .ref-status-done {
+      background: var(--done-soft);
+      color: var(--done);
+    }
+
+    .description-toggle,
+    .details-toggle {
+      display: block;
+      width: 100%;
+      padding: 0;
+      border: 0;
+      border-radius: 5px;
+      background: transparent;
+      text-align: left;
+    }
+
+    .description-toggle {
+      margin: 0.65rem 0 0;
+    }
+
+    .description-toggle.can-expand,
+    .details-toggle.can-expand {
+      cursor: pointer;
+    }
+
+    .description-toggle:disabled,
+    .details-toggle:disabled {
+      color: inherit;
+    }
+
+    .description-text {
+      display: -webkit-box;
+      overflow: hidden;
+      color: var(--text);
+      font-size: clamp(1rem, 1.5vw, 1.16rem);
+      font-weight: 720;
+      line-height: 1.42;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 3;
+    }
+
+    .task-card[data-status="ready"] .description-text {
+      color: var(--ready);
+    }
+
+    .task-card[data-status="blocked"] .description-text {
+      color: var(--blocked);
+    }
+
+    .task-card[data-status="done"] .description-text {
+      color: var(--done);
+    }
+
+    .description-toggle.expanded .description-text {
+      display: block;
+      overflow: visible;
+      -webkit-line-clamp: unset;
+    }
+
+    .task-details {
+      margin-top: 0.75rem;
+      padding: 0.65rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: color-mix(in srgb, var(--surface-muted) 65%, transparent);
+    }
+
+    .expand-hint {
+      display: none;
+      margin-top: 0.2rem;
+      color: var(--accent);
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+
+    .description-toggle.can-expand .expand-hint,
+    .details-toggle.can-expand .expand-hint {
+      display: inline-block;
+    }
+
+    .relationships {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.65rem;
+      margin-top: 0.8rem;
+    }
+
+    .relation-group,
+    .blocking-causes {
+      min-width: 0;
+      padding: 0.6rem 0.7rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: color-mix(in srgb, var(--surface-muted) 65%, transparent);
+    }
+
+    .relation-heading,
+    .blocking-heading {
+      margin: 0 0 0.35rem;
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 850;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .relation-list,
+    .cause-list {
+      display: grid;
+      gap: 0.4rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .relation-item,
+    .cause-item {
+      min-width: 0;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .ref-title {
+      min-width: 0;
+      overflow-wrap: anywhere;
+      color: var(--text);
+    }
+
+    .none {
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-style: italic;
+    }
+
+    .blocking-causes {
+      margin-top: 0.65rem;
+      border-color: color-mix(in srgb, var(--blocked) 34%, var(--border));
+      background: var(--blocked-soft);
+    }
+
+    .cause-item {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    /* Compact task-card layout. */
+    .task-list {
+      gap: 0.55rem;
+      min-width: 0;
+    }
+
+    .task-card,
+    .task-article,
+    .card-topline {
+      min-width: 0;
+    }
+
+    .task-article {
+      padding: 0.62rem 0.72rem 0.7rem;
+    }
+
+    .card-topline {
+      flex-wrap: nowrap;
+      justify-content: flex-start;
+      gap: 0.28rem;
+    }
+
+    .card-id-row {
+      flex: 0 0 auto;
+    }
+
+    .card-headline {
+      display: flex;
+      flex: 1 1 auto;
+      flex-wrap: wrap;
+      align-items: center;
+      min-width: 120px;
+      column-gap: 0.3rem;
+      row-gap: 0;
+    }
+
+    .task-ref,
+    .card-id-row .task-ref {
+      gap: 0;
+    }
+
+    .copy-button {
+      width: 19px;
+      min-width: 19px;
+      height: 20px;
+      margin: 0;
+      border-radius: 5px;
+    }
+
+    .copy-button::before {
+      top: 3px;
+      left: 1px;
+    }
+
+    .copy-button::after {
+      top: 6px;
+      left: 4px;
+    }
+
+    .copy-button.copied::before {
+      top: 2px;
+      left: 6px;
+    }
+
+    .ref-title,
+    .ref-status,
+    .ref-priority {
+      margin-left: 0;
+    }
+
+    .card-headline .description-toggle {
+      flex: 0 1 auto;
+      min-width: 0;
+      width: auto;
+      margin: 0;
+    }
+
+    .description-text {
+      font-size: 0.97rem;
+      line-height: 1.25;
+      -webkit-line-clamp: 2;
+    }
+
+    .description-toggle .expand-hint {
+      display: none !important;
+    }
+
+    .badges {
+      flex: 0 0 auto;
+      flex-wrap: nowrap;
+      gap: 0;
+    }
+
+    .badge,
+    .ref-status,
+    .ref-priority {
+      min-height: 20px;
+      padding: 0.08rem 0.38rem;
+      font-size: 0.63rem;
+    }
+
+    .task-details {
+      margin-top: 0.42rem;
+      padding: 0.38rem 0.5rem;
+      border-radius: 7px;
+    }
+
+    .details-toggle {
+      cursor: pointer;
+    }
+
+    .details-preview {
+      display: -webkit-box;
+      overflow: hidden;
+      overflow-wrap: anywhere;
+      color: var(--text);
+      font-size: 0.82rem;
+      line-height: 1.38;
+      white-space: normal;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 3;
+    }
+
+    .details-markdown-preview .markdown-heading,
+    .details-markdown-preview .markdown-paragraph,
+    .details-markdown-preview .markdown-quote,
+    .details-markdown-preview .markdown-preview-list-item {
+      display: inline;
+      margin: 0;
+    }
+
+    .details-markdown-preview .markdown-quote {
+      padding-left: 0;
+      border-left: 0;
+    }
+
+    .markdown-line-break {
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .details-rendered {
+      display: none;
+      color: var(--text);
+      font-size: 0.84rem;
+      line-height: 1.45;
+    }
+
+    .details-toggle.expanded .details-preview {
+      display: none;
+    }
+
+    .details-toggle.expanded .details-rendered {
+      display: block;
+    }
+
+    .markdown-paragraph,
+    .markdown-quote,
+    .details-rendered ul,
+    .details-rendered ol {
+      margin: 0;
+    }
+
+    .markdown-heading {
+      margin: 0.3lh 0;
+      color: #4f5965;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .markdown-blank {
+      display: block;
+      height: 0.3lh;
+    }
+
+    .markdown-blank:has(+ .markdown-heading),
+    .markdown-heading + .markdown-blank {
+      display: none;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .markdown-heading {
+        color: #aeb7c2;
+      }
+    }
+
+    .markdown-code {
+      overflow-x: auto;
+      padding: 0.4rem 0.5rem;
+      border-radius: 6px;
+      background: var(--surface);
+      font-family: ui-monospace, "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      white-space: pre-wrap;
+    }
+
+    .markdown-quote {
+      padding-left: 0.6rem;
+      border-left: 3px solid var(--border);
+      color: var(--muted);
+    }
+
+    .markdown-inline-code {
+      padding: 0.05rem 0.25rem;
+      border-radius: 4px;
+      background: var(--surface);
+      font-family: ui-monospace, "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+    }
+
+    .details-empty {
+      font-size: 0.78rem;
+    }
+
+    .relationships-compact {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem;
+      width: 100%;
+      min-width: 0;
+      max-width: 100%;
+      margin-top: 0.42rem;
+      padding: 0.3rem 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      background: color-mix(in srgb, var(--surface-muted) 65%, transparent);
+      overflow: visible;
+      white-space: normal;
+    }
+
+    .relation-inline {
+      display: inline-flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.18rem;
+      min-width: 0;
+    }
+
+    .relation-inline + .relation-inline {
+      padding-left: 0.5rem;
+      border-left: 1px solid var(--border);
+    }
+
+    .relation-inline-label {
+      color: var(--muted);
+      font-size: 0.64rem;
+      font-weight: 850;
+      letter-spacing: 0.04em;
+    }
+
+    .relation-separator {
+      color: var(--muted);
+      font-size: 0.72rem;
+    }
+
+    .relationships-compact .task-ref,
+    .relationships-compact .ref-title {
+      font-size: 0.75rem;
+    }
+
+    .hover-preview {
+      position: fixed;
+      z-index: 120;
+      width: min(560px, calc(100vw - 1rem));
+      max-height: min(380px, calc(100vh - 1rem));
+      padding: 0.75rem 0.85rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface-raised);
+      box-shadow: 0 16px 46px rgba(20, 32, 48, 0.28);
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .hover-preview-title {
+      margin: 0 0 0.45rem;
+      font-size: 1rem;
+      line-height: 1.3;
+    }
+
+    .hover-preview-body {
+      display: -webkit-box;
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.4;
+      white-space: pre-line;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 12;
+    }
+
+    .hover-preview-action {
+      color: var(--text);
+      font-weight: 800;
+    }
+
+    .empty-state {
+      margin-top: 2rem;
+      padding: 2.2rem 1rem;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .empty-state h2 {
+      margin: 0 0 0.35rem;
+      color: var(--text);
+    }
+
+    .empty-state p {
+      margin: 0;
+    }
+
+    .toast {
+      position: fixed;
+      z-index: 80;
+      right: 1rem;
+      bottom: 1rem;
+      max-width: min(360px, calc(100% - 2rem));
+      padding: 0.65rem 0.85rem;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: var(--text);
+      color: var(--surface);
+      box-shadow: var(--shadow);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(8px);
+      transition: opacity 140ms ease, transform 140ms ease;
+    }
+
+    .toast.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    @media (max-width: 820px) {
+      .app-header {
+        position: static;
+      }
+
+      .heading-row {
+        display: grid;
+      }
+
+      .summary {
+        width: 100%;
+      }
+
+      .filter-stack {
+        width: 100%;
+      }
+
+      .controls {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .search-control {
+        grid-column: 1 / -1;
+      }
+
+      .description-text {
+        -webkit-line-clamp: 2;
+      }
+    }
+
+    @media (max-width: 590px) {
+      .header-inner,
+      main {
+        width: min(100% - 1rem, 1380px);
+      }
+
+      .summary {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .graph-jump-button {
+        width: 3.2rem;
+        height: 3.2rem;
+      }
+
+      .graph-jump-button svg {
+        width: 2.05rem;
+        height: 2.05rem;
+      }
+
+      .controls,
+      .relationships {
+        grid-template-columns: 1fr;
+      }
+
+      .search-control {
+        grid-column: auto;
+      }
+
+      .navigation-notice {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .task-article {
+        padding-inline: 0.75rem;
+      }
+
+      .card-topline {
+        flex-wrap: wrap;
+      }
+
+      .card-headline .description-toggle {
+        order: 0;
+        flex-basis: auto;
+      }
+
+      .card-headline .badges {
+        margin-left: 0;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+      }
+
+      .task-card.navigation-target {
+        animation: none;
+        background-color: #FFFF50;
+      }
+    }
+
+    @media (forced-colors: active) {
+      .task-card,
+      .summary-button[aria-pressed="true"],
+      .type-filter-button[aria-pressed="true"],
+      .task-card.navigation-target {
+        border: 2px solid CanvasText;
+      }
+    }
+
+    @media print {
+      :root {
+        color-scheme: light;
+      }
+
+      body {
+        background: #fff;
+        color: #000;
+      }
+
+      .app-header {
+        position: static;
+        border: 0;
+        box-shadow: none;
+      }
+
+      .controls,
+      .copy-button,
+      .navigation-notice,
+      .graph-jump-button,
+      .toast,
+      .hover-preview,
+      .skip-link,
+      .expand-hint {
+        display: none !important;
+      }
+
+      .task-card {
+        break-inside: avoid;
+        box-shadow: none;
+      }
+
+      .description-text,
+      .details-rendered {
+        display: block !important;
+        overflow: visible !important;
+        -webkit-line-clamp: unset !important;
+      }
+
+      .details-preview {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#task-list">Skip to tasks</a>
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="heading-row">
+        <div class="heading-primary">
+          <button class="graph-jump-button" id="graph-jump" type="button" aria-controls="graph" aria-label="Jump to dependency graph" title="Jump to dependency graph">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <rect x="9" y="2" width="6" height="4" fill="none" stroke="currentColor" stroke-width="1.7"></rect>
+              <rect x="2" y="17" width="6" height="4" fill="none" stroke="currentColor" stroke-width="1.7"></rect>
+              <rect x="16" y="17" width="6" height="4" fill="none" stroke="currentColor" stroke-width="1.7"></rect>
+              <path d="M12 6v5M5 11h14M5 11v6M19 11v6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+          </button>
+          <div class="repository-heading">
+            <p class="eyebrow">tat dashboard</p>
+            <h1 id="repository-name">Tasks</h1>
+            <p class="result-count header-result-count" id="result-count" aria-live="polite"></p>
+          </div>
+        </div>
+        <div class="filter-stack">
+          <nav class="summary" aria-label="Filter tasks by status">
+            <button class="summary-button" type="button" data-status-filter="ready" aria-pressed="false">
+              <span class="summary-count" data-count="ready">0</span>
+              <span class="summary-label">Ready</span>
+            </button>
+            <button class="summary-button" type="button" data-status-filter="blocked" aria-pressed="false">
+              <span class="summary-count" data-count="blocked">0</span>
+              <span class="summary-label">Blocked</span>
+            </button>
+            <button class="summary-button" type="button" data-status-filter="recent-done" aria-pressed="false">
+              <span class="summary-count" data-count="recent-done">0</span>
+              <span class="summary-label">Recently done</span>
+            </button>
+            <button class="summary-button" type="button" data-status-filter="old-done" aria-pressed="false">
+              <span class="summary-count" data-count="old-done">0</span>
+              <span class="summary-label">Old done</span>
+            </button>
+          </nav>
+          <nav class="type-summary" aria-label="Filter tasks by type">
+            <button class="type-filter-button" type="button" data-type-filter="BUG" aria-pressed="false">Bug</button>
+            <button class="type-filter-button" type="button" data-type-filter="FEATURE" aria-pressed="false">Feature</button>
+            <button class="type-filter-button" type="button" data-type-filter="TASK" aria-pressed="false">Task</button>
+            <button class="type-filter-button" type="button" data-type-filter="GATE" aria-pressed="false">Gate</button>
+          </nav>
+        </div>
+      </div>
+      <section class="controls" aria-label="Task filters and sorting">
+        <label class="control search-control">
+          <svg class="control-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2"></circle><path d="m16 16 5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
+          <input id="search" type="search" autocomplete="off" aria-label="Search tasks" placeholder="ID, title, details, type, status, or relationship…">
+        </label>
+        <label class="control">
+          <svg class="control-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 4v16m0-16L4.5 7.5M8 4l3.5 3.5M16 20V4m0 16-3.5-3.5M16 20l3.5-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          <select id="sort" aria-label="Sort tasks">
+            <option value="priority-asc">Priority ↑</option>
+            <option value="priority-desc">Priority ↓</option>
+            <option value="id">ID</option>
+            <option value="title">Title</option>
+            <option value="status">Status</option>
+          </select>
+        </label>
+        <button class="clear-button" id="clear-filters" type="button">Reset</button>
+      </section>
+      <aside class="navigation-notice" id="navigation-notice" hidden>
+        <div class="navigation-message" id="navigation-message"></div>
+        <button class="return-button" id="return-to-results" type="button">Return to filtered results</button>
+      </aside>
+    </div>
+  </header>
+  <main>
+    <ul class="task-list" id="task-list" tabindex="-1"></ul>
+    <section class="empty-state" id="empty-state" hidden>
+      <h2 id="empty-heading">No tasks found</h2>
+      <p id="empty-message"></p>
+    </section>
+    <details class="graph-panel" id="graph" open>
+      <summary>
+        <span>Task dependency graph</span>
+        <span class="graph-legend">Click a task to focus its card · family boxes show PARENT · arrows show BLOCKS</span>
+      </summary>
+      <div class="graph-key" aria-label="Graph legend">
+        <span class="graph-key-item"><span class="graph-key-shape">▣</span>Parent family: solid Feature/Task · dashed Bug · thick Gate</span>
+        <span class="graph-key-item"><span class="graph-key-shape">◆</span>Gate leaf</span>
+        <span class="graph-key-item"><span class="graph-key-shape">⬢</span>Bug leaf</span>
+        <span class="graph-key-item"><span class="graph-key-shape">▭</span>Feature / Task leaf</span>
+        <span class="graph-key-status graph-key-ready">Active</span>
+        <span class="graph-key-status graph-key-blocked">Blocked</span>
+        <span class="graph-key-status graph-key-done">Done</span>
+      </div>
+      <div class="graph-scroll">
+        <div class="task-graph" id="task-graph" role="region" aria-label="Task dependency graph" tabindex="-1">
+          <p class="task-graph-message">Rendering task graph…</p>
+        </div>
+      </div>
+    </details>
+  </main>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <aside class="hover-preview" id="hover-preview" role="tooltip" hidden></aside>
+  <script id="task-data" type="application/json">__TATVIEWER_DATA__</script>
+  <!-- Mermaid 11.16.0; bundled under the following MIT license:
+__TATVIEWER_MERMAID_LICENSE__
+  -->
+  <script>__TATVIEWER_MERMAID_JS__</script>
+  <script>
+    "use strict";
+
+    const documentData = JSON.parse(document.getElementById("task-data").textContent);
+    const graphDefinition = __TATVIEWER_GRAPH__;
+    const tasks = Array.isArray(documentData.tasks) ? documentData.tasks : [];
+    const taskById = new Map(tasks.map((task) => [task.id, task]));
+    const includeOldDone = document.documentElement.dataset.includeOldDone === "true";
+    const recentMode = document.documentElement.dataset.recentMode === "date" ? "date" : "hours";
+    const recentValue = document.documentElement.dataset.recentValue;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const latestCompletion = tasks.reduce((latest, task) => Math.max(latest, Date.parse(task.completed_at) || 0), 0);
+    const allStatusBuckets = ["ready", "blocked", "recent-done", "old-done"];
+    const defaultStatusBuckets = ["ready", "blocked", "recent-done"];
+    const allTaskTypes = ["BUG", "FEATURE", "TASK", "GATE"];
+    const recentCompletionCutoff = recentMode === "date"
+      ? Date.parse(`${recentValue}T00:00:00.000Z`)
+      : latestCompletion
+        ? latestCompletion - (Number(recentValue) * 60 * 60 * 1000)
+        : 0;
+    const expandedTitles = new Set();
+    const expandedDetails = new Set();
+    const searchIndex = new Map();
+    const state = {
+      statuses: new Set(includeOldDone ? allStatusBuckets : defaultStatusBuckets),
+      types: new Set(allTaskTypes),
+      search: "",
+      sort: "priority-asc",
+      forcedId: null
+    };
+
+    const elements = {
+      appHeader: document.querySelector(".app-header"),
+      repositoryName: document.getElementById("repository-name"),
+      graphJump: document.getElementById("graph-jump"),
+      graphPanel: document.getElementById("graph"),
+      search: document.getElementById("search"),
+      sort: document.getElementById("sort"),
+      clear: document.getElementById("clear-filters"),
+      taskList: document.getElementById("task-list"),
+      taskGraph: document.getElementById("task-graph"),
+      resultCount: document.getElementById("result-count"),
+      emptyState: document.getElementById("empty-state"),
+      emptyHeading: document.getElementById("empty-heading"),
+      emptyMessage: document.getElementById("empty-message"),
+      navigationNotice: document.getElementById("navigation-notice"),
+      navigationMessage: document.getElementById("navigation-message"),
+      returnToResults: document.getElementById("return-to-results"),
+      toast: document.getElementById("toast"),
+      hoverPreview: document.getElementById("hover-preview")
+    };
+
+    const statusOrder = new Map([["ready", 0], ["blocked", 1], ["recent-done", 2], ["old-done", 3]]);
+    let toastTimer = null;
+    let hoverTimer = null;
+
+    function taskStatusBucket(task) {
+      if (task.status !== "done") return task.status;
+      const completed = Date.parse(task.completed_at) || 0;
+      if (!completed) return "old-done";
+      return completed >= recentCompletionCutoff ? "recent-done" : "old-done";
+    }
+
+    const graphTasks = tasks.filter((task) => taskStatusBucket(task) !== "old-done");
+
+    function directReferences(task) {
+      const relationships = task.relationships || {};
+      return [
+        ...(relationships.parent ? [relationships.parent] : []),
+        ...(relationships.children || []),
+        ...(relationships.blocks || []),
+        ...(relationships.blocked_by || [])
+      ];
+    }
+
+    for (const task of tasks) {
+      const terms = [task.id, task.title, task.body_markdown, task.type, task.status, task.priority_text];
+      for (const reference of directReferences(task)) {
+        terms.push(reference.id, reference.title, reference.status);
+      }
+      for (const cause of task.blocking_causes || []) {
+        terms.push(
+          cause.kind,
+          cause.blocker.id,
+          cause.blocker.title,
+          cause.blocked_target.id,
+          cause.blocked_target.title
+        );
+      }
+      searchIndex.set(task.id, terms.join(" ").toLocaleLowerCase());
+    }
+
+    function domId(taskId) {
+      return `task-${taskId.replace(/[^a-zA-Z0-9_-]/g, "_")}`;
+    }
+
+    function graphNodeId(taskId) {
+      return taskId.replace(/[^a-zA-Z0-9]/g, "_");
+    }
+
+    function findGraphTaskElement(task) {
+      const graphId = graphNodeId(task.id);
+      const marker = `flowchart-${graphId}-`;
+      const node = Array.from(elements.taskGraph.querySelectorAll(".node"))
+        .find((candidate) => candidate.id.includes(marker));
+      if (node) return node;
+      return Array.from(elements.taskGraph.querySelectorAll(".cluster"))
+        .find((candidate) => {
+          const candidateId = candidate.id || "";
+          const dataId = candidate.getAttribute("data-id") || "";
+          const label = candidate.querySelector(".cluster-label")?.textContent || "";
+          return candidateId === graphId
+            || candidateId.endsWith(`-${graphId}`)
+            || dataId === graphId
+            || label.trim().startsWith(`${task.id}:`);
+        });
+    }
+
+    function boldGraphTaskId(node, task) {
+      const label = node.querySelector(".nodeLabel");
+      const htmlTarget = label && (label.querySelector("p") || label);
+      if (htmlTarget && htmlTarget.namespaceURI === "http://www.w3.org/1999/xhtml") {
+        const strong = makeElement("strong", "task-graph-id", task.id);
+        htmlTarget.replaceChildren(strong, document.createTextNode(`: ${task.title}`));
+        return;
+      }
+
+      const textRoot = node.querySelector("text");
+      if (!textRoot) return;
+      const walker = document.createTreeWalker(textRoot, NodeFilter.SHOW_TEXT);
+      let textNode;
+      while ((textNode = walker.nextNode())) {
+        const offset = textNode.nodeValue.indexOf(task.id);
+        if (offset < 0) continue;
+        const before = textNode.nodeValue.slice(0, offset);
+        const after = textNode.nodeValue.slice(offset + task.id.length);
+        const bold = document.createElementNS("http://www.w3.org/2000/svg", "tspan");
+        bold.setAttribute("class", "task-graph-id");
+        bold.textContent = task.id;
+        const replacement = document.createDocumentFragment();
+        if (before) replacement.append(document.createTextNode(before));
+        replacement.append(bold);
+        if (after) replacement.append(document.createTextNode(after));
+        textNode.replaceWith(replacement);
+        return;
+      }
+    }
+
+    async function renderTaskGraph() {
+      if (!graphTasks.length) {
+        elements.taskGraph.replaceChildren(
+          makeElement("p", "task-graph-message", "No active, blocked, or recently done tasks to graph.")
+        );
+        return;
+      }
+      try {
+        window.mermaid.initialize({
+          startOnLoad: false,
+          securityLevel: "strict",
+          theme: window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "default",
+          flowchart: {
+            htmlLabels: false,
+            curve: "linear",
+            nodeSpacing: 18,
+            rankSpacing: 70,
+            wrappingWidth: 160,
+            diagramPadding: 8,
+            useMaxWidth: true
+          }
+        });
+        const rendered = await window.mermaid.render("tat-task-dependency-graph", graphDefinition);
+        elements.taskGraph.innerHTML = rendered.svg;
+        if (rendered.bindFunctions) rendered.bindFunctions(elements.taskGraph);
+
+        for (const task of graphTasks) {
+          const graphElement = findGraphTaskElement(task);
+          if (!graphElement) continue;
+          boldGraphTaskId(graphElement, task);
+          graphElement.classList.add("task-graph-link");
+          if (graphElement.classList.contains("cluster")) graphElement.classList.add("task-graph-family");
+          graphElement.setAttribute("role", "link");
+          graphElement.setAttribute("tabindex", "0");
+          graphElement.setAttribute("aria-label", `Focus ${task.id}: ${task.title}`);
+          const activate = (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            navigateToTask(task.id, true);
+          };
+          graphElement.addEventListener("click", activate);
+          graphElement.addEventListener("keydown", (event) => {
+            if (event.key === "Enter" || event.key === " ") activate(event);
+          });
+        }
+      } catch (error) {
+        elements.taskGraph.replaceChildren(
+          makeElement("p", "task-graph-message", "The task graph could not be rendered.")
+        );
+        console.error("Could not render the TAT task graph", error);
+      }
+    }
+
+    function taskIdFromHash() {
+      const hash = decodeURIComponent(window.location.hash.slice(1));
+      if (!hash) return null;
+      const match = tasks.find((task) => domId(task.id) === hash);
+      return match ? match.id : null;
+    }
+
+    function makeElement(tagName, className, text) {
+      const element = document.createElement(tagName);
+      if (className) element.className = className;
+      if (text !== undefined) element.textContent = text;
+      return element;
+    }
+
+    function createCopyButton(taskId) {
+      const button = makeElement("button", "copy-button");
+      button.type = "button";
+      button.title = `Copy ${taskId}`;
+      button.setAttribute("aria-label", `Copy task ID ${taskId}`);
+      button.addEventListener("click", async (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        await copyTaskId(taskId, button);
+      });
+      return button;
+    }
+
+    function createTaskReference(reference, options = {}) {
+      const wrapper = makeElement("span", "task-ref");
+      const navigable = options.navigable !== false;
+      const showTitle = options.showTitle !== false;
+      const showStatus = options.showStatus !== false;
+      const showPriority = showStatus && options.showPriority !== false;
+      const idElement = makeElement(navigable ? "a" : "span", navigable ? "task-link" : "task-id", reference.id);
+      idElement.dir = "ltr";
+      if (navigable) {
+        idElement.href = `#${domId(reference.id)}`;
+        idElement.addEventListener("click", (event) => {
+          event.preventDefault();
+          navigateToTask(reference.id, true);
+        });
+      }
+      wrapper.append(idElement, createCopyButton(reference.id));
+      if (showStatus && reference.status) {
+        wrapper.append(makeElement("span", `ref-status ref-status-${reference.status}`, reference.status));
+      }
+      if (showPriority && reference.priority_text) {
+        wrapper.append(makeElement("span", "ref-priority", `P${reference.priority_text}`));
+      }
+      if (showTitle) {
+        wrapper.append(makeElement("span", "ref-title", reference.title));
+      }
+      const relatedTask = taskById.get(reference.id);
+      if (relatedTask && options.showPreview !== false) {
+        attachHoverPreview(wrapper, relatedTask, "reference");
+      }
+      return wrapper;
+    }
+
+    function createBadge(text, className = "") {
+      return makeElement("span", `badge ${className}`.trim(), text);
+    }
+
+    function uniqueReferences(references) {
+      return [...new Map((references || []).map((reference) => [reference.id, reference])).values()];
+    }
+
+    function createCompactRelationships(task) {
+      const relationships = task.relationships || {};
+      const blockedBy = uniqueReferences([
+        ...(relationships.blocked_by || []),
+        ...(task.blocking_causes || []).map((cause) => cause.blocker)
+      ]).filter((reference) => reference.status !== "done");
+      const groups = [
+        ["BLOCKED BY", blockedBy],
+        ["PARENT", relationships.parent ? [relationships.parent] : []],
+        ["BLOCKS", relationships.blocks || []],
+        ["CHILDREN", relationships.children || []]
+      ].filter(([, references]) => references.length > 0);
+      if (groups.length === 0) return null;
+
+      const container = makeElement("section", "relationships-compact");
+      container.setAttribute("aria-label", "Task relationships");
+      for (const [label, references] of groups) {
+        const group = makeElement("span", "relation-inline");
+        group.append(makeElement("span", "relation-inline-label", label));
+        references.forEach((reference, index) => {
+          if (index > 0) group.append(makeElement("span", "relation-separator", ","));
+          group.append(createTaskReference(reference));
+        });
+        container.append(group);
+      }
+      return container;
+    }
+
+    function createDescription(task) {
+      const button = makeElement("button", "description-toggle");
+      button.type = "button";
+      button.dataset.taskTitle = task.id;
+      button.setAttribute("aria-expanded", expandedTitles.has(task.id) ? "true" : "false");
+      const text = makeElement("span", "description-text", task.title);
+      text.dir = "auto";
+      button.append(text);
+      if (expandedTitles.has(task.id)) button.classList.add("expanded", "can-expand");
+      button.addEventListener("click", () => {
+        const expanded = expandedTitles.has(task.id);
+        if (expanded) expandedTitles.delete(task.id);
+        else expandedTitles.add(task.id);
+        button.classList.toggle("expanded", !expanded);
+        button.setAttribute("aria-expanded", String(!expanded));
+      });
+      return button;
+    }
+
+    function compactDetailsText(markdown) {
+      return markdown
+        .replace(/\r\n?/g, "\n")
+        .split("\n")
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .map((line) => line
+          .replace(/^#{1,6}\s+/, "")
+          .replace(/^[-*+]\s+/, "• ")
+          .replace(/^\d+[.)]\s+/, "")
+          .replace(/^>\s?/, "")
+          .replace(/\*\*([^*]+)\*\*/g, "$1")
+          .replace(/__([^_]+)__/g, "$1")
+          .replace(/`([^`]+)`/g, "$1"))
+        .join("\n");
+    }
+
+    function renderMarkdownPreview(markdown) {
+      const root = makeElement("span", "details-preview details-markdown-preview");
+      const lines = markdown.replace(/\r\n?/g, "\n").split("\n");
+      let fenced = false;
+
+      lines.forEach((line, index) => {
+        if (index > 0) root.append(makeElement("span", "markdown-line-break", "↵ "));
+        if (/^\s*```/.test(line)) {
+          fenced = !fenced;
+          return;
+        }
+        if (fenced) {
+          root.append(makeElement("code", "markdown-inline-code", line));
+          return;
+        }
+        if (!line.trim()) return;
+
+        const heading = line.match(/^#{1,6}\s+(.+)$/);
+        const bullet = line.match(/^\s*[-*+]\s+(.+)$/);
+        const numbered = line.match(/^\s*(\d+[.)])\s+(.+)$/);
+        const quote = line.match(/^\s*>\s?(.*)$/);
+        let element;
+        let text;
+        if (heading) {
+          element = makeElement("span", "markdown-heading");
+          text = heading[1];
+        } else if (bullet) {
+          element = makeElement("span", "markdown-preview-list-item");
+          element.append(document.createTextNode("• "));
+          text = bullet[1];
+        } else if (numbered) {
+          element = makeElement("span", "markdown-preview-list-item");
+          element.append(document.createTextNode(`${numbered[1]} `));
+          text = numbered[2];
+        } else {
+          element = makeElement("span", quote ? "markdown-quote" : "markdown-paragraph");
+          text = quote ? quote[1] : line;
+        }
+        appendInlineMarkdown(element, text);
+        root.append(element);
+      });
+      return root;
+    }
+
+    function appendInlineMarkdown(parent, text) {
+      const pattern = /(\*\*[^*]+\*\*|__[^_]+__|`[^`]+`|\*[^*]+\*|_[^_]+_)/g;
+      let cursor = 0;
+      for (const match of text.matchAll(pattern)) {
+        if (match.index > cursor) parent.append(document.createTextNode(text.slice(cursor, match.index)));
+        const token = match[0];
+        if (token.startsWith("**") || token.startsWith("__")) {
+          parent.append(makeElement("strong", "", token.slice(2, -2)));
+        } else if (token.startsWith("`")) {
+          parent.append(makeElement("code", "markdown-inline-code", token.slice(1, -1)));
+        } else {
+          parent.append(makeElement("em", "", token.slice(1, -1)));
+        }
+        cursor = match.index + token.length;
+      }
+      if (cursor < text.length) parent.append(document.createTextNode(text.slice(cursor)));
+    }
+
+    function renderMarkdown(markdown) {
+      const root = makeElement("div", "details-rendered");
+      const lines = markdown.replace(/\r\n?/g, "\n").split("\n");
+      let list = null;
+      let listKind = null;
+      let fenced = false;
+      let codeLines = [];
+
+      function endList() {
+        list = null;
+        listKind = null;
+      }
+
+      function appendListItem(kind, text) {
+        if (!list || listKind !== kind) {
+          endList();
+          list = document.createElement(kind);
+          listKind = kind;
+          root.append(list);
+        }
+        const item = document.createElement("li");
+        appendInlineMarkdown(item, text);
+        list.append(item);
+      }
+
+      for (const line of lines) {
+        if (/^\s*```/.test(line)) {
+          endList();
+          if (fenced) {
+            root.append(makeElement("pre", "markdown-code", codeLines.join("\n")));
+            codeLines = [];
+          }
+          fenced = !fenced;
+          continue;
+        }
+        if (fenced) {
+          codeLines.push(line);
+          continue;
+        }
+        if (!line.trim()) {
+          endList();
+          root.append(makeElement("span", "markdown-blank", " "));
+          continue;
+        }
+        const heading = line.match(/^#{1,6}\s+(.+)$/);
+        if (heading) {
+          endList();
+          const element = makeElement("p", "markdown-heading");
+          appendInlineMarkdown(element, heading[1]);
+          root.append(element);
+          continue;
+        }
+        const bullet = line.match(/^\s*[-*+]\s+(.+)$/);
+        if (bullet) {
+          appendListItem("ul", bullet[1]);
+          continue;
+        }
+        const numbered = line.match(/^\s*\d+[.)]\s+(.+)$/);
+        if (numbered) {
+          appendListItem("ol", numbered[1]);
+          continue;
+        }
+        endList();
+        const quote = line.match(/^\s*>\s?(.*)$/);
+        const element = makeElement("p", quote ? "markdown-quote" : "markdown-paragraph");
+        appendInlineMarkdown(element, quote ? quote[1] : line);
+        root.append(element);
+      }
+      if (fenced || codeLines.length) root.append(makeElement("pre", "markdown-code", codeLines.join("\n")));
+      return root;
+    }
+
+    function hideHoverPreview() {
+      window.clearTimeout(hoverTimer);
+      hoverTimer = null;
+      elements.hoverPreview.hidden = true;
+    }
+
+    function showHoverPreview(anchor, task, kind) {
+      const body = compactDetailsText(task.body_markdown || "");
+      elements.hoverPreview.replaceChildren();
+      if (kind === "reference") {
+        elements.hoverPreview.append(makeElement("h4", "hover-preview-title", task.title));
+      }
+      const previewBody = makeElement("div", "hover-preview-body");
+      const excerpt = body.length > 1600 ? `${body.slice(0, 1600)}…` : body;
+      previewBody.append(document.createTextNode(excerpt || "No details provided."));
+      if (kind === "details") {
+        previewBody.append(document.createTextNode(" "));
+        previewBody.append(makeElement("strong", "hover-preview-action", "Click for full details"));
+      }
+      elements.hoverPreview.append(previewBody);
+      elements.hoverPreview.hidden = false;
+
+      const rect = anchor.getBoundingClientRect();
+      const tooltipRect = elements.hoverPreview.getBoundingClientRect();
+      const left = Math.max(8, Math.min(rect.left, innerWidth - tooltipRect.width - 8));
+      const below = rect.bottom + 8;
+      const top = below + tooltipRect.height <= innerHeight - 8
+        ? below
+        : Math.max(8, rect.top - tooltipRect.height - 8);
+      elements.hoverPreview.style.left = `${left}px`;
+      elements.hoverPreview.style.top = `${top}px`;
+    }
+
+    function isVisuallyTruncated(element) {
+      return element.scrollHeight > element.clientHeight + 1 || element.scrollWidth > element.clientWidth + 1;
+    }
+
+    function attachHoverPreview(element, task, kind, shouldShow = () => true) {
+      const schedule = () => {
+        hideHoverPreview();
+        if (!shouldShow()) return;
+        hoverTimer = window.setTimeout(() => {
+          if (shouldShow()) showHoverPreview(element, task, kind);
+        }, 1050);
+      };
+      element.addEventListener("pointerenter", schedule);
+      element.addEventListener("pointerleave", hideHoverPreview);
+      element.addEventListener("focusin", schedule);
+      element.addEventListener("focusout", hideHoverPreview);
+    }
+
+    function createDetails(task) {
+      const body = typeof task.body_markdown === "string" ? task.body_markdown : "";
+      if (!body.trim()) return null;
+
+      const section = makeElement("section", "task-details");
+      const button = makeElement("div", "details-toggle");
+      button.setAttribute("role", "button");
+      button.tabIndex = 0;
+      button.dataset.taskDetails = task.id;
+      const expanded = expandedDetails.has(task.id);
+      button.setAttribute("aria-expanded", String(expanded));
+      button.setAttribute("aria-label", `${expanded ? "Collapse" : "Expand"} details for ${task.id}`);
+      const preview = renderMarkdownPreview(body);
+      preview.dir = "auto";
+      button.append(preview, renderMarkdown(body));
+      if (expanded) button.classList.add("expanded");
+      const toggleDetails = () => {
+        hideHoverPreview();
+        const isExpanded = expandedDetails.has(task.id);
+        if (isExpanded) expandedDetails.delete(task.id);
+        else expandedDetails.add(task.id);
+        button.classList.toggle("expanded", !isExpanded);
+        button.setAttribute("aria-expanded", String(!isExpanded));
+        button.setAttribute("aria-label", `${isExpanded ? "Expand" : "Collapse"} details for ${task.id}`);
+      };
+      button.addEventListener("click", toggleDetails);
+      button.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          toggleDetails();
+        }
+      });
+      attachHoverPreview(
+        button,
+        task,
+        "details",
+        () => !expandedDetails.has(task.id) && isVisuallyTruncated(preview)
+      );
+      section.append(button);
+      return section;
+    }
+
+    function createTaskCard(task) {
+      const listItem = makeElement("li", "task-card");
+      listItem.dataset.status = task.status;
+      listItem.dataset.taskId = task.id;
+      const article = makeElement("article", "task-article");
+      article.id = domId(task.id);
+      article.dataset.taskId = task.id;
+      article.tabIndex = -1;
+
+      const topLine = makeElement("div", "card-topline");
+      const idRow = makeElement("div", "card-id-row");
+      idRow.append(createTaskReference(task, {
+        navigable: false,
+        showTitle: false,
+        showStatus: false,
+        showPreview: false
+      }));
+      const badges = makeElement("div", "badges");
+      badges.append(
+        createBadge(task.status, `badge-${task.status}`),
+        createBadge(task.type),
+        createBadge(`P${task.priority_text}`)
+      );
+      const headline = makeElement("div", "card-headline");
+      headline.append(createDescription(task), badges);
+      topLine.append(idRow, headline);
+      article.append(topLine);
+      const details = createDetails(task);
+      if (details) article.append(details);
+      const compactRelationships = createCompactRelationships(task);
+      if (compactRelationships) article.append(compactRelationships);
+      listItem.append(article);
+      return listItem;
+    }
+
+    function matchesFilters(task) {
+      if (!state.statuses.has(taskStatusBucket(task))) return false;
+      if (!state.types.has(task.type)) return false;
+      const query = state.search.trim().toLocaleLowerCase();
+      return !query || searchIndex.get(task.id).includes(query);
+    }
+
+    function compareTasks(left, right) {
+      switch (state.sort) {
+        case "priority-desc":
+          return right.priority - left.priority || left.id.localeCompare(right.id);
+        case "id":
+          return left.id.localeCompare(right.id);
+        case "title":
+          return left.title.localeCompare(right.title) || left.id.localeCompare(right.id);
+        case "status":
+          return (statusOrder.get(taskStatusBucket(left)) - statusOrder.get(taskStatusBucket(right))) || left.id.localeCompare(right.id);
+        default:
+          return left.priority - right.priority || left.id.localeCompare(right.id);
+      }
+    }
+
+    function updateSummary() {
+      const counts = { ready: 0, blocked: 0, "recent-done": 0, "old-done": 0 };
+      for (const task of tasks) counts[taskStatusBucket(task)] += 1;
+      for (const [status, count] of Object.entries(counts)) {
+        const target = document.querySelector(`[data-count="${status}"]`);
+        if (target) target.textContent = String(count);
+      }
+      for (const button of document.querySelectorAll("[data-status-filter]")) {
+        button.setAttribute("aria-pressed", String(state.statuses.has(button.dataset.statusFilter)));
+      }
+      for (const button of document.querySelectorAll("[data-type-filter]")) {
+        button.setAttribute("aria-pressed", String(state.types.has(button.dataset.typeFilter)));
+      }
+    }
+
+    function updateEmptyState(baseCount) {
+      const empty = baseCount === 0 && !state.forcedId;
+      elements.emptyState.hidden = !empty;
+      if (!empty) return;
+      if (tasks.length === 0) {
+        elements.emptyHeading.textContent = "No repository tasks";
+        elements.emptyMessage.textContent = "The validated task store is empty.";
+      } else if (state.statuses.size === 0 || state.types.size === 0) {
+        elements.emptyHeading.textContent = "No filter categories selected";
+        elements.emptyMessage.textContent = "Turn on at least one status and one task type.";
+      } else {
+        elements.emptyHeading.textContent = "No matching tasks";
+        elements.emptyMessage.textContent = "Change or reset the current search and filters.";
+      }
+    }
+
+    function updateNavigationNotice(forcedOutside) {
+      elements.navigationNotice.hidden = !forcedOutside;
+      elements.navigationMessage.replaceChildren();
+      if (!forcedOutside || !state.forcedId) return;
+      const task = taskById.get(state.forcedId);
+      elements.navigationMessage.append(document.createTextNode("Shown for navigation outside the current filters: "));
+      elements.navigationMessage.append(createTaskReference(task, { navigable: false, showStatus: true }));
+    }
+
+    let expandableMeasureFrame = 0;
+
+    function prepareExpandableToggles() {
+      cancelAnimationFrame(expandableMeasureFrame);
+      expandableMeasureFrame = requestAnimationFrame(() => {
+        for (const button of document.querySelectorAll("[data-task-title]")) {
+          const text = button.querySelector(".description-text");
+          const expanded = button.classList.contains("expanded");
+          const overflows = text.scrollHeight > text.clientHeight + 1;
+          button.classList.toggle("can-expand", expanded || overflows);
+        }
+      });
+    }
+
+    function render() {
+      const base = tasks.filter(matchesFilters);
+      const visible = [...base];
+      const forcedTask = state.forcedId ? taskById.get(state.forcedId) : null;
+      const forcedOutside = Boolean(forcedTask && !visible.some((task) => task.id === forcedTask.id));
+      if (forcedOutside) visible.push(forcedTask);
+      visible.sort(compareTasks);
+      elements.taskList.replaceChildren(...visible.map(createTaskCard));
+      elements.resultCount.textContent = forcedOutside
+        ? `${base.length} matching task${base.length === 1 ? "" : "s"} plus 1 navigation target — ${tasks.length} total`
+        : `${visible.length} of ${tasks.length} task${tasks.length === 1 ? "" : "s"} shown`;
+      updateSummary();
+      updateEmptyState(base.length);
+      updateNavigationNotice(forcedOutside);
+      prepareExpandableToggles();
+    }
+
+    function focusTask(taskId) {
+      requestAnimationFrame(() => {
+        const card = document.getElementById(domId(taskId));
+        if (!card) return;
+        document.querySelectorAll(".navigation-target").forEach((element) => element.classList.remove("navigation-target"));
+        card.closest(".task-card").classList.add("navigation-target");
+        card.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "center" });
+        card.focus({ preventScroll: true });
+        window.setTimeout(() => {
+          const wrapper = card.closest(".task-card");
+          if (wrapper) wrapper.classList.remove("navigation-target");
+        }, 4800);
+      });
+    }
+
+    function navigateToTask(taskId, updateHistory) {
+      if (!taskById.has(taskId)) return;
+      state.forcedId = taskId;
+      if (updateHistory) {
+        const nextHash = `#${domId(taskId)}`;
+        if (window.location.hash !== nextHash) history.pushState(null, "", nextHash);
+      }
+      render();
+      focusTask(taskId);
+    }
+
+    function focusGraph(updateHistory) {
+      elements.graphPanel.open = true;
+      if (updateHistory && window.location.hash !== "#graph") {
+        history.pushState(null, "", "#graph");
+      }
+      const stickyHeader = getComputedStyle(elements.appHeader).position === "sticky";
+      const headerOffset = stickyHeader ? elements.appHeader.getBoundingClientRect().height + 12 : 12;
+      const panelTop = window.scrollY + elements.graphPanel.getBoundingClientRect().top - headerOffset;
+      window.scrollTo({ top: Math.max(0, panelTop), behavior: reducedMotion ? "auto" : "smooth" });
+      elements.graphPanel.querySelector("summary").focus({ preventScroll: true });
+    }
+
+    function clearForcedNavigation(clearHash = true) {
+      state.forcedId = null;
+      if (clearHash && window.location.hash) {
+        const url = new URL(window.location.href);
+        url.hash = "";
+        history.replaceState(null, "", url.href);
+      }
+    }
+
+    async function copyTaskId(taskId, button) {
+      let copied = false;
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(taskId);
+          copied = true;
+        }
+      } catch (_) {
+        copied = false;
+      }
+      if (!copied) {
+        const textarea = document.createElement("textarea");
+        textarea.value = taskId;
+        textarea.setAttribute("readonly", "");
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.append(textarea);
+        textarea.select();
+        copied = document.execCommand("copy");
+        textarea.remove();
+      }
+      showToast(copied ? `Copied ${taskId}` : `Could not copy ${taskId}`);
+      if (copied) {
+        button.classList.add("copied");
+        window.setTimeout(() => button.classList.remove("copied"), 1200);
+      }
+    }
+
+    function showToast(message) {
+      elements.toast.textContent = message;
+      elements.toast.classList.add("visible");
+      window.clearTimeout(toastTimer);
+      toastTimer = window.setTimeout(() => elements.toast.classList.remove("visible"), 1800);
+    }
+
+    function resetFilters() {
+      clearForcedNavigation();
+      state.statuses = new Set(includeOldDone ? allStatusBuckets : defaultStatusBuckets);
+      state.types = new Set(allTaskTypes);
+      state.search = "";
+      state.sort = "priority-asc";
+      elements.search.value = "";
+      elements.sort.value = "priority-asc";
+      render();
+    }
+
+    for (const button of document.querySelectorAll("[data-status-filter]")) {
+      button.addEventListener("click", () => {
+        clearForcedNavigation();
+        const status = button.dataset.statusFilter;
+        if (state.statuses.has(status)) state.statuses.delete(status);
+        else state.statuses.add(status);
+        render();
+      });
+    }
+
+    for (const button of document.querySelectorAll("[data-type-filter]")) {
+      button.addEventListener("click", () => {
+        clearForcedNavigation();
+        const taskType = button.dataset.typeFilter;
+        if (state.types.has(taskType)) state.types.delete(taskType);
+        else state.types.add(taskType);
+        render();
+      });
+    }
+
+    elements.search.addEventListener("input", () => {
+      clearForcedNavigation();
+      state.search = elements.search.value;
+      render();
+    });
+
+    elements.sort.addEventListener("change", () => {
+      state.sort = elements.sort.value;
+      render();
+    });
+
+    elements.clear.addEventListener("click", resetFilters);
+    elements.graphJump.addEventListener("click", () => focusGraph(true));
+    elements.returnToResults.addEventListener("click", () => {
+      clearForcedNavigation();
+      render();
+      elements.taskList.focus();
+    });
+
+    window.addEventListener("hashchange", () => {
+      if (window.location.hash === "#graph") {
+        state.forcedId = null;
+        render();
+        focusGraph(false);
+        return;
+      }
+      const taskId = taskIdFromHash();
+      if (taskId) navigateToTask(taskId, false);
+      else {
+        state.forcedId = null;
+        render();
+      }
+    });
+
+    window.addEventListener("resize", prepareExpandableToggles, { passive: true });
+    window.addEventListener("resize", hideHoverPreview, { passive: true });
+    window.addEventListener("scroll", hideHoverPreview, { passive: true, capture: true });
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(prepareExpandableToggles);
+    }
+
+    document.addEventListener("keydown", (event) => {
+      const activeTag = document.activeElement && document.activeElement.tagName;
+      if (event.key === "/" && !["INPUT", "SELECT", "TEXTAREA"].includes(activeTag)) {
+        event.preventDefault();
+        elements.search.focus();
+      } else if (event.key === "Escape" && document.activeElement === elements.search && elements.search.value) {
+        elements.search.value = "";
+        state.search = "";
+        clearForcedNavigation();
+        render();
+      }
+    });
+
+    elements.repositoryName.textContent = documentData.repository || "Repository tasks";
+    document.title = `${documentData.repository || "Repository"} — TAT dashboard`;
+
+    const initialGraphHash = window.location.hash === "#graph";
+    const initialHashTask = taskIdFromHash();
+    if (initialGraphHash) {
+      render();
+    } else if (initialHashTask) {
+      state.forcedId = initialHashTask;
+      render();
+      focusTask(initialHashTask);
+    } else {
+      render();
+    }
+    renderTaskGraph();
+    if (initialGraphHash) requestAnimationFrame(() => focusGraph(false));
+  </script>
+</body>
+</html>

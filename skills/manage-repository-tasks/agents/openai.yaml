@@ -1,0 +1,4 @@
+interface:
+  display_name: "Manage Repository Tasks"
+  short_description: "Create, prioritize, track, and complete repo tasks"
+  default_prompt: "Use $manage-repository-tasks to create and manage repository task files."

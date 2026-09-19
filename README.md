@@ -8,9 +8,16 @@ Each skill lives in its own folder with a `SKILL.md` entry point and any support
 
 | Skill | What it does |
 | --- | --- |
+| [Manage Repository Tasks (TAT)](skills/manage-repository-tasks/SKILL.md) | Manages repository tasks with the Rust TAT command-line tool and its HTML viewer. |
 | [Master Controller](skills/master-controller/SKILL.md) | Runs PowerShell and CMD scripts through a paired worker runner, and provides the runner for deployment. |
 | [Toula the Fixer](skills/toula-the-fixer/SKILL.md) | Diagnoses and resolves IT incidents across Windows, macOS, and Linux, either through verified direct access or by guiding an on-site engineer. |
 | [Unslop](skills/unslop/SKILL.md) | Removes common AI writing patterns from user-facing prose while preserving requested style and technical accuracy. |
+
+### Manage Repository Tasks (TAT)
+
+TAT stores tasks as Markdown files in the repository that owns the work. Its CLI manages priorities, dependencies, and completion history; its companion viewer generates a self-contained HTML report.
+
+Develop TAT in `skills/manage-repository-tasks/`. This folder includes the Rust source, tests, skill instructions, and Windows executables. Run Cargo commands from that folder.
 
 ### Master Controller
 
@@ -31,6 +38,7 @@ Unslop edits user-facing prose to remove filler, vague claims, canned phrasing, 
 Ask the built-in skill installer for the skill you want:
 
 ```text
+$skill-installer Install the skill at https://github.com/ndemou/Nicks-Skills/tree/main/skills/manage-repository-tasks
 $skill-installer Install the skill at https://github.com/ndemou/Nicks-Skills/tree/main/skills/master-controller
 $skill-installer Install the skill at https://github.com/ndemou/Nicks-Skills/tree/main/skills/toula-the-fixer
 $skill-installer Install the skill at https://github.com/ndemou/Nicks-Skills/tree/main/skills/unslop
@@ -54,6 +62,15 @@ $toula-the-fixer Help diagnose why users cannot reach our file server. Ask me fo
 
 ```text
 skills/
+  manage-repository-tasks/
+    SKILL.md
+    Cargo.toml
+    agents/
+    assets/
+    src/
+    tests/
+    tat.exe
+    tatviewer.exe
   master-controller/
     SKILL.md
     agents/
