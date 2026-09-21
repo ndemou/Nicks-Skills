@@ -17,13 +17,14 @@ Tell the user to save it as `worker-runner.ps1`, change to the directory it shou
 
 ## Run a script
 
-Pass an existing `.ps1`, `.cmd`, or `.bat` file through `-ScriptPath`. Use `-RunnerDirectory` for the paired runner directory. `-TimeoutSeconds` is optional and defaults to 120 seconds.
+Pass an existing `.ps1`, `.cmd`, or `.bat` file through `-ScriptPath`. Use `-RunnerDirectory` for the paired runner directory. `-TimeoutSeconds` is optional and defaults to 120 seconds. `-MaximumOutputKiB` is optional and defaults to 50; the controller writes it to `config.json` in the runner directory before submitting the script.
 
 ```powershell
 & '<absolute-skill-path>\scripts\Master-Controller.ps1' `
     -ScriptPath 'C:\path\to\script.ps1' `
     -RunnerDirectory 'C:\it\temp' `
-    -TimeoutSeconds 120
+    -TimeoutSeconds 120 `
+    -MaximumOutputKiB 50
 ```
 
 Use the same command for CMD code with a `.cmd` or `.bat` file. If the user supplies code instead of a file, save it in a task-scoped file with the correct extension first. Do not write it directly into the runner directory.

@@ -16,11 +16,57 @@ function Write-RunnerMessage {
     }
 }
 
+function Get-MaximumOutputKiB {
+    param(
+        [string]$ConfigPath,
+        [long]$DefaultValue
+    )
+
+    $configFile = Get-Item -LiteralPath $ConfigPath -ErrorAction SilentlyContinue
+    if (($configFile -eq $null) -or $configFile.PSIsContainer) {
+        return $DefaultValue
+    }
+
+    $configLines = @(Get-Content -LiteralPath $ConfigPath -ErrorAction SilentlyContinue)
+    if ($configLines.Count -eq 0) {
+        Write-RunnerMessage `
+            -Message ("Could not read " + $ConfigPath + ". Using the default " + $DefaultValue + "KiB limit.") `
+            -ForegroundColor Yellow
+        return $DefaultValue
+    }
+
+    $configText = [string]::Join([System.Environment]::NewLine, [string[]]$configLines)
+    $settingMatch = [System.Text.RegularExpressions.Regex]::Match(
+        $configText,
+        '"maximumOutputKiB"\s*:\s*([0-9]+)'
+    )
+    $configuredValue = [long]0
+
+    if ((-not $settingMatch.Success) -or
+        (-not [long]::TryParse($settingMatch.Groups[1].Value, [ref]$configuredValue))) {
+        Write-RunnerMessage `
+            -Message ("Could not use " + $ConfigPath + ". The maximumOutputKiB setting is missing or is not a positive integer. Using the default " + $DefaultValue + "KiB limit.") `
+            -ForegroundColor Yellow
+        return $DefaultValue
+    }
+
+    if (($configuredValue -lt 1) -or ($configuredValue -gt 2147483647)) {
+        Write-RunnerMessage `
+            -Message ("Could not use " + $ConfigPath + ". The maximumOutputKiB setting must be between 1 and 2147483647. Using the default " + $DefaultValue + "KiB limit.") `
+            -ForegroundColor Yellow
+        return $DefaultValue
+    }
+
+    return $configuredValue
+}
+
 # Watch the directory from which the runner was started, not the directory
 # containing this script.
 $workDirectory = (Get-Location).Path
 $outputPath = Join-Path $workDirectory 'code-output.txt'
 $temporaryOutputPath = Join-Path $workDirectory ("code-output-from-code-being-executed-" + $PID + ".tmp")
+$configPath = Join-Path $workDirectory 'config.json'
+$defaultMaximumOutputKiB = 50
 $pollMilliseconds = 500
 $requiredUnchangedChecks = 2
 $postRunDelayMilliseconds = 1000
@@ -87,7 +133,8 @@ while ($true) {
     if ($readyCandidates.Count -eq 0) {
         if (-not $waitingAnnounced) {
             Write-RunnerMessage `
-                -Message ("Waiting for code to appear in " + $workDirectory + " (" + $candidateNames + ").")
+                -Message ("Waiting for code to appear in " + $workDirectory + " (" + $candidateNames + ").") `
+                -ForegroundColor DarkCyan
             $waitingAnnounced = $true
         }
 
@@ -115,6 +162,13 @@ while ($true) {
         $ready['UnchangedChecks'] = 0
         continue
     }
+
+    # Read this for every command so a controller can change the limit without
+    # restarting the worker. Other JSON settings can be added in the future.
+    $maximumPublishedOutputKiB = Get-MaximumOutputKiB `
+        -ConfigPath $configPath `
+        -DefaultValue $defaultMaximumOutputKiB
+    $maximumPublishedOutputBytes = [long]$maximumPublishedOutputKiB * 1024
 
     # Avoid overwriting a code archive if another run already used this second.
     do {
@@ -179,6 +233,42 @@ while ($true) {
             tee -FilePath $temporaryOutputPath
     }
 
+    # Keep oversized output in the worker directory and publish only a short
+    # pointer for the master to read.
+    $temporaryOutputFile = Get-Item -LiteralPath $temporaryOutputPath
+    if ($temporaryOutputFile.Length -gt $maximumPublishedOutputBytes) {
+        do {
+            $fullOutputTimestamp = (Get-Date).ToString('yyyy-MM-dd.HH.mm.ss')
+            $fullOutputName = "code-output-full-at-" + $fullOutputTimestamp + ".txt"
+            $fullOutputPath = Join-Path $workDirectory $fullOutputName
+
+            if (Test-Path -LiteralPath $fullOutputPath) {
+                [System.Threading.Thread]::Sleep($postRunDelayMilliseconds)
+            }
+        }
+        while (Test-Path -LiteralPath $fullOutputPath)
+
+        while (Test-Path -LiteralPath $temporaryOutputPath) {
+            Move-Item -LiteralPath $temporaryOutputPath -Destination $fullOutputPath -ErrorAction SilentlyContinue
+
+            if (Test-Path -LiteralPath $temporaryOutputPath) {
+                Write-RunnerMessage `
+                    -Message 'Waiting to preserve the full oversized output file.' `
+                    -ForegroundColor Yellow
+                [System.Threading.Thread]::Sleep($pollMilliseconds)
+            }
+        }
+
+        $inlineCodeMarker = [char]96
+        $oversizedOutputMessage = `
+            'The output of this command was longer than ' + $maximumPublishedOutputKiB + 'KiB. I have saved it as ' + `
+            $inlineCodeMarker + $fullOutputName + $inlineCodeMarker + `
+            ' under the worker folder but I would strongly advise you not to read it in full. ' + `
+            'It will consume too many tokens and will pollute the context with too much irrelevant information. ' + `
+            'Either use grep/Select-String to extract pieces of information from it or retry with a different command/script'
+        [System.IO.File]::WriteAllText($temporaryOutputPath, $oversizedOutputMessage)
+    }
+
     # Publish only the completed output. Keep retrying if another program has
     # the destination open. The previous complete output remains until then.
     while (Test-Path -LiteralPath $temporaryOutputPath) {
@@ -210,6 +300,8 @@ while ($true) {
         $candidate['File'] = $null
     }
 
-    Write-RunnerMessage -Message 'Waiting for one second before the next script is executed.'
+    Write-RunnerMessage `
+        -Message 'Waiting for one second before the next script is executed.' `
+        -ForegroundColor DarkCyan
     [System.Threading.Thread]::Sleep($postRunDelayMilliseconds)
 }

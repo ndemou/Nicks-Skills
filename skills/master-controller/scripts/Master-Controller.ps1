@@ -11,7 +11,12 @@ param(
 
     [Parameter(Position = 2)]
     [ValidateRange(1, 2147483647)]
-    [int]$TimeoutSeconds = 120
+    [int]$TimeoutSeconds = 120,
+
+    [Parameter(Position = 3)]
+    [Alias('OutputLimitKiB')]
+    [ValidateRange(1, 2147483647)]
+    [int]$MaximumOutputKiB = 50
 )
 
 # Compatible with Windows PowerShell 5.1 and PowerShell 7.
@@ -62,6 +67,7 @@ switch ($extension) {
 
 $submittedPath = Join-Path $runnerDirectoryPath $submittedName
 $outputPath = Join-Path $runnerDirectoryPath 'code-output.txt'
+$configPath = Join-Path $runnerDirectoryPath 'config.json'
 $lockPath = Join-Path $runnerDirectoryPath '.master-controller.lock'
 $pendingPaths = @(
     (Join-Path $runnerDirectoryPath 'code-to-run.ps1'),
@@ -92,6 +98,19 @@ try {
             throw "The runner already has a pending script: $pendingPath"
         }
     }
+
+    # Publish the complete configuration before the script. The worker reads
+    # this file once per command, so its limit can change without a restart.
+    $config = @{
+        maximumOutputKiB = $MaximumOutputKiB
+    }
+    $configJson = ConvertTo-Json -InputObject $config -Compress
+    $stagingName = "config-uploading-by-master-" + $PID + "-" + [Guid]::NewGuid().ToString('N') + ".tmp"
+    $stagingPath = Join-Path $runnerDirectoryPath $stagingName
+    [System.IO.File]::WriteAllText($stagingPath, $configJson)
+
+    Move-Item -LiteralPath $stagingPath -Destination $configPath -Force
+    $stagingPath = $null
 
     # Move any unconsumed result out of the well-known output path before the
     # new request is submitted, so only the new result can satisfy this call.
