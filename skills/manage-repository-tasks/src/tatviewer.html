@@ -426,16 +426,107 @@
     }
 
     .task-graph {
-      min-width: 720px;
       padding: 0.75rem;
       text-align: center;
     }
 
     .task-graph svg {
       display: block;
-      width: 100%;
+      width: var(--graph-width, 100%);
+      max-width: none;
       height: auto;
       margin-inline: auto;
+    }
+
+    .graph-views {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      padding: 0 0.8rem 0.65rem;
+    }
+
+    .graph-view-button {
+      padding: 0.45rem 0.8rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      cursor: pointer;
+    }
+
+    .graph-view-button[aria-pressed="true"] {
+      color: var(--accent);
+      background: var(--accent-soft);
+      border-color: var(--accent);
+    }
+
+    .graph-supplement,
+    .graph-families {
+      padding: 0.8rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .graph-supplement h3 {
+      margin: 0 0 0.65rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .graph-task-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+      gap: 0.5rem 1.25rem;
+    }
+
+    .graph-task-reference {
+      display: block;
+      width: 100%;
+      text-align: left;
+      overflow-wrap: anywhere;
+      padding: 0.5rem 0.65rem;
+      border: 0;
+      border-left: 3px solid var(--ready);
+      border-radius: 4px;
+      background: var(--ready-soft);
+      color: var(--text);
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    .graph-task-reference[data-status="blocked"] {
+      border-color: var(--blocked);
+      background: var(--blocked-soft);
+    }
+
+    .graph-task-reference[data-status="done"] {
+      border-color: var(--done);
+      background: var(--done-soft);
+    }
+
+    .graph-task-reference:hover {
+      text-decoration: underline;
+    }
+
+    .graph-task-meta {
+      display: block;
+      margin-top: 0.25rem;
+      color: var(--muted);
+      font-size: 0.75rem;
+    }
+
+    .graph-family-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .graph-family-list li + li {
+      margin-top: 0.5rem;
+    }
+
+    .graph-family-list .graph-family-list {
+      margin: 0.5rem 0 0.75rem 0.65rem;
+      padding-left: 0.65rem;
+      border-left: 1px solid var(--border);
     }
 
     .task-graph .task-graph-link {
@@ -1371,22 +1462,29 @@
     <details class="graph-panel" id="graph" open>
       <summary>
         <span>Task dependency graph</span>
-        <span class="graph-legend">Click a task to focus its card · family boxes show PARENT · arrows show BLOCKS</span>
+        <span class="graph-legend">Click a task to focus its card · arrows show BLOCKS, left to right</span>
       </summary>
+      <div class="graph-views" role="group" aria-label="Graph view">
+        <button class="graph-view-button" id="graph-flow-button" type="button" aria-pressed="true" aria-controls="graph-flow">Blocking flow</button>
+        <button class="graph-view-button" id="graph-families-button" type="button" aria-pressed="false" aria-controls="graph-families">Task families</button>
+      </div>
       <div class="graph-key" aria-label="Graph legend">
-        <span class="graph-key-item"><span class="graph-key-shape">▣</span>Parent family: solid Feature/Task · dashed Bug · thick Gate</span>
-        <span class="graph-key-item"><span class="graph-key-shape">◆</span>Gate leaf</span>
-        <span class="graph-key-item"><span class="graph-key-shape">⬢</span>Bug leaf</span>
-        <span class="graph-key-item"><span class="graph-key-shape">▭</span>Feature / Task leaf</span>
-        <span class="graph-key-status graph-key-ready">Active</span>
+        <span class="graph-key-item"><span class="graph-key-shape">◆</span>Gate</span>
+        <span class="graph-key-item"><span class="graph-key-shape">⬢</span>Bug</span>
+        <span class="graph-key-item"><span class="graph-key-shape">▭</span>Feature / Task</span>
+        <span class="graph-key-status graph-key-ready">Ready</span>
         <span class="graph-key-status graph-key-blocked">Blocked</span>
         <span class="graph-key-status graph-key-done">Done</span>
       </div>
-      <div class="graph-scroll">
-        <div class="task-graph" id="task-graph" role="region" aria-label="Task dependency graph" tabindex="-1">
-          <p class="task-graph-message">Rendering task graph…</p>
+      <div id="graph-flow">
+        <div class="graph-scroll">
+          <div class="task-graph" id="task-graph" role="region" aria-label="Task dependency graph" tabindex="-1">
+            <p class="task-graph-message">Rendering task graph…</p>
+          </div>
         </div>
+        <section class="graph-supplement" id="graph-unlinked" hidden></section>
       </div>
+      <div class="graph-families" id="graph-families" role="region" aria-label="Task families" hidden></div>
     </details>
   </main>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -1460,6 +1558,75 @@ __TATVIEWER_MERMAID_LICENSE__
     }
 
     const graphTasks = tasks.filter((task) => taskStatusBucket(task) !== "old-done");
+    const graphTaskById = new Map(graphTasks.map((task) => [task.id, task]));
+    const linkedGraphIds = new Set();
+    for (const task of graphTasks) {
+      for (const target of task.relationships.blocks || []) {
+        if (!graphTaskById.has(target.id)) continue;
+        linkedGraphIds.add(task.id);
+        linkedGraphIds.add(target.id);
+      }
+    }
+
+    function graphTaskReference(task, showParent = false) {
+      const button = makeElement("button", "graph-task-reference");
+      button.type = "button";
+      button.dataset.status = task.status;
+      button.append(makeElement("strong", "task-graph-id", task.id), document.createTextNode(`: ${task.title}`));
+      const parent = task.relationships.parent;
+      const metadata = [task.type, task.status, `p${task.priority_text}`];
+      if (showParent && parent) metadata.push(`Parent ${parent.id}`);
+      button.append(makeElement("span", "graph-task-meta", metadata.join(" · ")));
+      button.addEventListener("click", () => navigateToTask(task.id, true));
+      return button;
+    }
+
+    function renderGraphFamilies() {
+      const children = new Map();
+      for (const task of graphTasks) {
+        const parent = task.relationships.parent?.id;
+        const key = graphTaskById.has(parent) ? parent : null;
+        if (!children.has(key)) children.set(key, []);
+        children.get(key).push(task);
+      }
+      const visited = new Set();
+      const branch = (parent) => {
+        const list = makeElement("ul", "graph-family-list");
+        const siblings = (children.get(parent) || []).slice().sort((a, b) => a.priority - b.priority || a.id.localeCompare(b.id));
+        for (const task of siblings) {
+          if (visited.has(task.id)) continue;
+          visited.add(task.id);
+          const item = makeElement("li");
+          item.append(graphTaskReference(task, parent === null));
+          if (children.has(task.id)) item.append(branch(task.id));
+          list.append(item);
+        }
+        return list;
+      };
+      const families = document.getElementById("graph-families");
+      families.replaceChildren(branch(null));
+      if (!graphTasks.length) families.append(makeElement("p", "task-graph-message", "No active, blocked, or recently done tasks to graph."));
+
+      const unlinked = graphTasks.filter((task) => !linkedGraphIds.has(task.id));
+      const supplement = document.getElementById("graph-unlinked");
+      supplement.hidden = !unlinked.length;
+      supplement.replaceChildren();
+      if (unlinked.length) {
+        supplement.append(makeElement("h3", "", `No blocking links in this view · ${unlinked.length} tasks`));
+        const list = makeElement("div", "graph-task-list");
+        list.append(...unlinked.map((task) => graphTaskReference(task, true)));
+        supplement.append(list);
+      }
+    }
+
+    for (const view of ["flow", "families"]) {
+      document.getElementById(`graph-${view}-button`).addEventListener("click", () => {
+        for (const choice of ["flow", "families"]) {
+          document.getElementById(`graph-${choice}`).hidden = choice !== view;
+          document.getElementById(`graph-${choice}-button`).setAttribute("aria-pressed", String(choice === view));
+        }
+      });
+    }
 
     function directReferences(task) {
       const relationships = task.relationships || {};
@@ -1545,10 +1712,15 @@ __TATVIEWER_MERMAID_LICENSE__
     }
 
     async function renderTaskGraph() {
+      renderGraphFamilies();
       if (!graphTasks.length) {
         elements.taskGraph.replaceChildren(
           makeElement("p", "task-graph-message", "No active, blocked, or recently done tasks to graph.")
         );
+        return;
+      }
+      if (!linkedGraphIds.size) {
+        elements.taskGraph.replaceChildren(makeElement("p", "task-graph-message", "No blocking links between the included tasks. Use Task families to explore their hierarchy."));
         return;
       }
       try {
@@ -1556,19 +1728,25 @@ __TATVIEWER_MERMAID_LICENSE__
           startOnLoad: false,
           securityLevel: "strict",
           theme: window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "default",
+          themeVariables: { fontSize: "14px" },
           flowchart: {
             htmlLabels: false,
-            curve: "linear",
-            nodeSpacing: 18,
-            rankSpacing: 70,
-            wrappingWidth: 160,
+            curve: "monotoneX",
+            nodeSpacing: 26,
+            rankSpacing: 54,
+            wrappingWidth: 180,
             diagramPadding: 8,
-            useMaxWidth: true
+            useMaxWidth: false
           }
         });
         const rendered = await window.mermaid.render("tat-task-dependency-graph", graphDefinition);
         elements.taskGraph.innerHTML = rendered.svg;
         if (rendered.bindFunctions) rendered.bindFunctions(elements.taskGraph);
+        // Preserve the measured font size. Dense graphs may scroll horizontally,
+        // but must never shrink their labels to fit the available page width.
+        const svg = elements.taskGraph.querySelector("svg");
+        const width = svg?.viewBox.baseVal.width;
+        if (width) svg.style.setProperty("--graph-width", `${width}px`);
 
         for (const task of graphTasks) {
           const graphElement = findGraphTaskElement(task);
@@ -1579,6 +1757,10 @@ __TATVIEWER_MERMAID_LICENSE__
           graphElement.setAttribute("role", "link");
           graphElement.setAttribute("tabindex", "0");
           graphElement.setAttribute("aria-label", `Focus ${task.id}: ${task.title}`);
+          const parent = task.relationships.parent;
+          const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
+          title.textContent = `${task.id}: ${task.title}${parent ? `\nParent: ${parent.id}: ${parent.title}` : ""}`;
+          graphElement.prepend(title);
           const activate = (event) => {
             event.preventDefault();
             event.stopPropagation();

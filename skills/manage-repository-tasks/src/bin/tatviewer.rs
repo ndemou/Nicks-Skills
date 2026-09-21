@@ -1,5 +1,5 @@
 use clap::Parser;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 use std::fs::{self, File, OpenOptions};
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
@@ -19,7 +19,7 @@ const MERMAID_LICENSE: &str = include_str!("../../assets/MERMAID_LICENSE.txt");
     name = "tatviewer",
     version,
     about = "Export an interactive, self-contained HTML dashboard for tat tasks.",
-    long_about = "Export an interactive, self-contained HTML dashboard for tat tasks.\n\nThe default report starts with READY, BLOCKED, and RECENTLY DONE selected. Use --all to add OLD DONE cards; OLD DONE tasks are never included in the diagram. By default, recent means the 48-hour window ending at the repository's latest current completion. --recent accepts another number of hours or an inclusive oldest UTC calendar day. The collapsible Mermaid graph follows the task cards and can grow to its full natural height; the top-left graph button jumps to its stable #graph address. Parent tasks become linked family containers with their included children nested inside; arrows represent blocking relationships. Truncated task details expand in place and render Markdown; relationship references provide delayed title-and-detail previews.",
+    long_about = "Export an interactive, self-contained HTML dashboard for tat tasks.\n\nThe default report starts with READY, BLOCKED, and RECENTLY DONE selected. Use --all to add OLD DONE cards; OLD DONE tasks are never included in the diagram. By default, recent means the 48-hour window ending at the repository's latest current completion. --recent accepts another number of hours or an inclusive oldest UTC calendar day. The collapsible Mermaid graph follows the task cards and can grow to its full natural height; the top-left graph button jumps to its stable #graph address. The Blocking flow view arranges dependencies left to right, with unrelated tasks listed separately. The Task families view shows the parent hierarchy without dependency arrows. Both views link to task cards. Truncated task details expand in place and render Markdown; relationship references provide delayed title-and-detail previews.",
     after_help = "EXAMPLES:\n  tatviewer\n  tatviewer --all\n  tatviewer --recent 72 --output-path .\\tasks.html\n  tatviewer --recent 2026-08-01 --open"
 )]
 struct Cli {
@@ -386,58 +386,6 @@ fn graph_task_is_visible(task: &TaskListItem, recent_cutoff: Option<i64>) -> Res
     Ok(parse_canonical_utc_millis(completed_at)? >= recent_cutoff)
 }
 
-fn render_mermaid_family<'a>(
-    task: &'a TaskListItem,
-    visible_by_id: &HashMap<&'a str, &'a TaskListItem>,
-    rendered: &mut HashSet<&'a str>,
-    containers: &mut HashSet<&'a str>,
-    lines: &mut Vec<String>,
-    depth: usize,
-) {
-    if !rendered.insert(task.id.as_str()) {
-        return;
-    }
-    let indentation = "  ".repeat(depth);
-    let mut children = task
-        .relationships
-        .children
-        .iter()
-        .filter_map(|reference| visible_by_id.get(reference.id.as_str()).copied())
-        .collect::<Vec<_>>();
-    children.sort_by(|left, right| left.id.cmp(&right.id));
-    if children.is_empty() {
-        lines.push(mermaid_node(task, &indentation));
-        return;
-    }
-
-    containers.insert(task.id.as_str());
-    let id = mermaid_node_id(&task.id);
-    let label = mermaid_label(&format!("{}: {}", task.id, task.title));
-    lines.push(format!("{indentation}subgraph {id}[\"{label}\"]"));
-    lines.push(format!("{indentation}  direction TD"));
-    for child in children {
-        render_mermaid_family(child, visible_by_id, rendered, containers, lines, depth + 1);
-    }
-    lines.push(format!("{indentation}end"));
-}
-
-fn mermaid_container_style(task: &TaskListItem) -> String {
-    let (fill, stroke, color) = match task.status.as_str() {
-        "ready" => ("#ddf5e8", "#137a47", "#0b5935"),
-        "blocked" => ("#fee9e6", "#b03a2e", "#7f291f"),
-        _ => ("#e9edf1", "#66717f", "#46505c"),
-    };
-    let border = match task.task_type.as_str() {
-        "GATE" => "stroke-width:4px",
-        "BUG" => "stroke-width:2px,stroke-dasharray:6 3",
-        _ => "stroke-width:2px",
-    };
-    format!(
-        "  style {} fill:{fill},stroke:{stroke},color:{color},{border}",
-        mermaid_node_id(&task.id)
-    )
-}
-
 fn build_mermaid_graph(
     document: &TaskListDocument,
     recent: &RecentWindow,
@@ -453,53 +401,33 @@ fn build_mermaid_graph(
         })
         .collect::<Result<Vec<_>, _>>()?;
     tasks.sort_by(|left, right| left.id.cmp(&right.id));
-    let visible_by_id = tasks
+    let visible_ids = tasks
         .iter()
-        .map(|task| (task.id.as_str(), *task))
-        .collect::<HashMap<_, _>>();
-    let mut lines = vec!["flowchart TD".to_owned()];
-    let mut rendered = HashSet::new();
-    let mut containers = HashSet::new();
-    for task in &tasks {
-        let has_visible_parent = task
-            .relationships
-            .parent
-            .as_ref()
-            .is_some_and(|parent| visible_by_id.contains_key(parent.id.as_str()));
-        if !has_visible_parent {
-            render_mermaid_family(
-                task,
-                &visible_by_id,
-                &mut rendered,
-                &mut containers,
-                &mut lines,
-                1,
-            );
-        }
-    }
-    for task in &tasks {
-        if !rendered.contains(task.id.as_str()) {
-            render_mermaid_family(
-                task,
-                &visible_by_id,
-                &mut rendered,
-                &mut containers,
-                &mut lines,
-                1,
-            );
-        }
-    }
+        .map(|task| task.id.as_str())
+        .collect::<HashSet<_>>();
+    let mut connected = HashSet::new();
+    let mut edges = Vec::new();
     for task in &tasks {
         for target in &task.relationships.blocks {
-            if visible_by_id.contains_key(target.id.as_str()) {
-                lines.push(format!(
-                    "  {} -->|blocks| {}",
+            if visible_ids.contains(target.id.as_str()) {
+                connected.insert(task.id.as_str());
+                connected.insert(target.id.as_str());
+                edges.push(format!(
+                    "  {} --> {}",
                     mermaid_node_id(&task.id),
                     mermaid_node_id(&target.id)
                 ));
             }
         }
     }
+    // Isolated tasks are shown as a wrapping list, never as extra layout ranks.
+    // Keep a valid node-only definition for exports without blocking links.
+    if !connected.is_empty() {
+        tasks.retain(|task| connected.contains(task.id.as_str()));
+    }
+    let mut lines = vec!["flowchart LR".to_owned()];
+    lines.extend(tasks.iter().map(|task| mermaid_node(task, "  ")));
+    lines.extend(edges);
     lines.extend([
         "  classDef graphReady fill:#ddf5e8,stroke:#137a47,color:#0b5935,stroke-width:2px"
             .to_owned(),
@@ -509,15 +437,11 @@ fn build_mermaid_graph(
             .to_owned(),
     ]);
     for task in tasks {
-        if containers.contains(task.id.as_str()) {
-            lines.push(mermaid_container_style(task));
-        } else {
-            lines.push(format!(
-                "  class {} {}",
-                mermaid_node_id(&task.id),
-                mermaid_status_class(&task.status)
-            ));
-        }
+        lines.push(format!(
+            "  class {} {}",
+            mermaid_node_id(&task.id),
+            mermaid_status_class(&task.status)
+        ));
     }
     Ok(lines.join("\n"))
 }
@@ -850,7 +774,7 @@ mod tests {
         assert!(html.contains("data-recent-mode=\"hours\""));
         assert!(html.contains("data-recent-value=\"48\""));
         assert!(html.contains("\\u003c/script\\u003e"));
-        assert!(html.contains("const graphDefinition = \"flowchart TD"));
+        assert!(html.contains("const graphDefinition = \"flowchart LR"));
         assert!(html.contains("class t_abcd graphReady"));
         assert!(html.contains("boldGraphTaskId(graphElement, task)"));
         assert!(html.contains("const graphTasks = tasks.filter"));
@@ -862,7 +786,7 @@ mod tests {
         assert!(!html.contains("box-shadow: 0 0 0 4px color-mix"));
         assert!(html.contains("overflow-y: visible"));
         assert!(html.contains("max-height: none"));
-        assert!(html.contains("wrappingWidth: 160"));
+        assert!(html.contains("wrappingWidth: 180"));
         assert!(!html.contains("setDashboardView(view, options = {})"));
         assert!(html.contains(".task-card[data-status=\"ready\"] .description-text"));
         assert!(html.contains("globalThis[\"mermaid\"]"));
@@ -896,7 +820,7 @@ mod tests {
     }
 
     #[test]
-    fn mermaid_graph_nests_children_in_navigable_parent_families() {
+    fn mermaid_graph_keeps_parent_relationships_out_of_the_blocking_layout() {
         let mut value = document("Parent", "Parent body");
         value.tasks[0].task_type = "FEATURE".to_owned();
         value.tasks[0].relationships.children.push(TaskReference {
@@ -921,12 +845,13 @@ mod tests {
         value.tasks.push(child);
 
         let graph = build_mermaid_graph(&value, &RecentWindow::Hours(48)).unwrap();
-        let family = graph.find("subgraph t_abcd[\"t@abcd: Parent\"]").unwrap();
-        let child = graph.find("t_chil(\"t@chil: Child\")").unwrap();
-        let family_end = graph[child..].find("\n  end").unwrap() + child;
-        assert!(family < child && child < family_end);
-        assert!(!graph.contains("|parent|"));
-        assert!(graph.contains("style t_abcd fill:#ddf5e8,stroke:#137a47"));
+        assert!(graph.contains("t_abcd(\"t@abcd: Parent\")"));
+        assert!(graph.contains("t_chil(\"t@chil: Child\")"));
+        assert!(!graph.contains("subgraph"));
+        assert!(!graph.contains(" --> "));
+        let html = render_html(&value, false, &RecentWindow::Hours(48)).unwrap();
+        assert!(html.contains("id=\"graph-families\""));
+        assert!(html.contains("renderGraphFamilies()"));
     }
 
     #[test]
@@ -947,6 +872,50 @@ mod tests {
         assert!(graph.contains("t_newd(\"t@newd: Recently done\")"));
         assert!(!graph.contains("t_oldd"));
         assert!(!graph.contains("Old done"));
+    }
+
+    #[test]
+    fn access_workflow_preserves_cross_family_edges_without_layout_containers() {
+        let value: TaskListDocument =
+            serde_json::from_str(include_str!("../../tests/fixtures/access-workflow.json"))
+                .unwrap();
+        assert_eq!(value.tasks.len(), 17);
+        let graph = build_mermaid_graph(&value, &RecentWindow::Hours(48)).unwrap();
+        assert!(graph.starts_with("flowchart LR\n"));
+        assert!(!graph.contains("subgraph"));
+        let expected = value
+            .tasks
+            .iter()
+            .flat_map(|task| {
+                task.relationships.blocks.iter().map(|target| {
+                    format!(
+                        "  {} --> {}",
+                        mermaid_node_id(&task.id),
+                        mermaid_node_id(&target.id)
+                    )
+                })
+            })
+            .collect::<HashSet<_>>();
+        let actual = graph
+            .lines()
+            .filter(|line| line.contains(" --> "))
+            .map(str::to_owned)
+            .collect::<HashSet<_>>();
+        assert_eq!(expected.len(), 12);
+        assert_eq!(actual, expected);
+        // Family-only parents and unconnected tasks cannot enlarge the flow.
+        for id in ["t_m46p", "t_goz4", "t_ypov", "t_pyph", "t_2cio", "t_q3b3"] {
+            assert!(!graph.contains(id), "isolated task {id} entered the flow");
+        }
+        let html = render_html(&value, false, &RecentWindow::Hours(48)).unwrap();
+        let start = html
+            .find("<script id=\"task-data\" type=\"application/json\">")
+            .unwrap()
+            + "<script id=\"task-data\" type=\"application/json\">".len();
+        let end = start + html[start..].find("</script>").unwrap();
+        let exported: serde_json::Value = serde_json::from_str(&html[start..end]).unwrap();
+        // Every task and parent relationship remains available in Task families.
+        assert_eq!(exported, serde_json::to_value(&value).unwrap());
     }
 
     #[test]

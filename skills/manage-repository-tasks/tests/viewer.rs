@@ -80,7 +80,7 @@ fn embedded_graph(html: &str) -> String {
 }
 
 #[test]
-fn exports_a_self_contained_default_dashboard_with_a_navigable_family_graph() {
+fn exports_a_self_contained_dashboard_with_separate_blocking_and_family_views() {
     let repo = repository();
     let parent = created_id(
         repo.path(),
@@ -158,8 +158,8 @@ fn exports_a_self_contained_default_dashboard_with_a_navigable_family_graph() {
     assert!(!html.contains("box-shadow: 0 0 0 4px color-mix"));
     assert!(html.contains("overflow-y: visible"));
     assert!(html.contains("max-height: none"));
-    assert!(html.contains("nodeSpacing: 18"));
-    assert!(html.contains("rankSpacing: 70"));
+    assert!(html.contains("nodeSpacing: 26"));
+    assert!(html.contains("rankSpacing: 54"));
     assert!(
         html.find("id=\"task-list\"").unwrap()
             < html
@@ -172,7 +172,7 @@ fn exports_a_self_contained_default_dashboard_with_a_navigable_family_graph() {
     assert!(html.contains("task-graph-link"));
     assert!(html.contains("boldGraphTaskId(graphElement, task)"));
     assert!(html.contains("findGraphTaskElement"));
-    assert!(html.contains("family boxes show PARENT"));
+    assert!(html.contains("arrows show BLOCKS, left to right"));
     assert!(html.contains("class=\"graph-key\""));
     assert!(html.contains(".task-card[data-status=\"ready\"] .description-text"));
     assert!(html.contains(".task-card[data-status=\"blocked\"] .description-text"));
@@ -209,16 +209,13 @@ fn exports_a_self_contained_default_dashboard_with_a_navigable_family_graph() {
     assert!(!html.contains("<script src="));
 
     let graph = embedded_graph(&html);
-    assert!(graph.starts_with("flowchart TD\n"));
-    assert!(graph.contains(&format!(
-        "subgraph {}[\"{parent}:",
-        parent.replace('@', "_")
-    )));
+    assert!(graph.starts_with("flowchart LR\n"));
+    assert!(!graph.contains("subgraph"));
     assert!(graph.contains(&format!("{}(\"{child}:", child.replace('@', "_"))));
     assert!(graph.contains(&format!("{}{{\"{gate}:", gate.replace('@', "_"))));
     assert!(!graph.contains("-->|parent|"));
-    assert!(graph.contains("-->|blocks|"));
-    assert!(graph.contains(&format!("style {} fill:#ddf5e8", parent.replace('@', "_"))));
+    assert!(graph.contains(" --> "));
+    assert!(!graph.contains(&parent.replace('@', "_")));
     assert!(graph.contains(&format!("class {} graphBlocked", child.replace('@', "_"))));
 
     let data = embedded_json(&html);
