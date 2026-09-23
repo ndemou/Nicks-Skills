@@ -8,7 +8,7 @@ Each skill lives in its own folder with a `SKILL.md` entry point and any support
 
 | Skill | What it does |
 | --- | --- |
-| [ALINA Web App Maintainer](skills/alina-webapp-maintainer/SKILL.md) | Maintains and deploys code changes to the ALINA examinations app through the `mas` SSH account. |
+| [ALINA Web App Maintainer](skills/alina-webapp-maintainer/SKILL.md) | Maintains code and authorized SQLite/PDF files for the ALINA examinations app through the `mas` SSH account. |
 | [Manage Repository Tasks (TAT)](skills/manage-repository-tasks/SKILL.md) | Manages repository tasks with the Rust TAT command-line tool and its HTML viewer. |
 | [Master Controller](skills/master-controller/SKILL.md) | Runs PowerShell and CMD scripts through a paired worker runner, and provides the runner for deployment. |
 | [Toula the Fixer](skills/toula-the-fixer/SKILL.md) | Diagnoses and resolves IT incidents across Windows, macOS, and Linux, either through verified direct access or by guiding an on-site engineer. |
@@ -65,6 +65,8 @@ $toula-the-fixer Help diagnose why users cannot reach our file server. Ask me fo
 skills/
   alina-webapp-maintainer/
     SKILL.md
+    references/
+      data-files.md
   manage-repository-tasks/
     SKILL.md
     Cargo.toml

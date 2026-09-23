@@ -1,6 +1,6 @@
 ---
 name: alina-webapp-maintainer
-description: Maintain and deploy code changes to the ALINA examinations web app at enlogic.gr through the mas SSH account. Use for this app's UI, Python backend, and deployment checks; not for general server administration or patient-data work.
+description: Maintain the ALINA examinations web app at enlogic.gr through the mas SSH account, including code updates and authorized SQLite/PDF file maintenance. Do not use for unrelated server administration or medical interpretation.
 ---
 
 # Συντήρηση της εφαρμογής ALINA
@@ -12,11 +12,11 @@ description: Maintain and deploy code changes to the ALINA examinations web app 
 - Συνδέσου από το τοπικό περιβάλλον εργασίας με `ssh mas@enlogic.gr`. Το δημόσιο ED25519 host key είχε fingerprint `SHA256:lhe18hZQ4rUWLTNXVq0fFLz0BZKCjHp8US//MPRMnuI`. Αν εμφανιστεί νέο ή διαφορετικό fingerprint, ζήτησε ανεξάρτητη επιβεβαίωση από τον Nick. Άφησε τον άνθρωπο να πληκτρολογήσει τον κωδικό στο κανονικό SSH prompt. Μη ζητάς κωδικό στο chat και μη χρησιμοποιείς `sshpass` ή αποθήκευση κωδικού σε αρχείο.
 - Επιβεβαίωσε `id -un` = `mas`, τον στόχο SSH και το path πριν γράψεις αρχεία. Αν δεν έχεις πραγματική πρόσβαση σε shell/SSH, δώσε συγκεκριμένες εντολές στον χρήστη και περίμενε τα αποτελέσματά τους. Μην αναφέρεις αλλαγές ως ολοκληρωμένες χωρίς έλεγχο.
 - URL: `https://enlogic.gr/other/alinas-exams/`. Κώδικας: `/var/www/enlogic.gr/other/alinas-exams/`. Τα αρχεία εφαρμογής είναι `index.html`, `styles.css`, `app.js`, `local_server.py`, `pdf_extract.py`. Η υπηρεσία είναι `alina-exams.service` και ακούει μόνο στο `127.0.0.1:8766`, πίσω από Nginx.
-- Ο `mas` ανήκει στην ομάδα `alina-exams-editors` και μπορεί να γράφει και να σβήνει **μέσα** στον φάκελο κώδικα. Μπορεί να εκτελέσει μόνο `sudo -n /usr/bin/systemctl restart alina-exams.service`, όχι γενικό `sudo`. Η βάση SQLite και τα PDF είναι στο `/var/lib/alina-exams/`, έξω από το web directory, με ξεχωριστά δικαιώματα.
+- Ο `mas` ανήκει στις ομάδες `alina-exams-editors` και `alina-exams`. Μπορεί να γράφει και να σβήνει στον φάκελο κώδικα και στο `data/` κάτω από αυτόν. Η βάση είναι `data/alina_tracker.db` και τα PDF είναι στο `data/documents/`. Το `data/` δεν είναι αναγνώσιμο από τον χρήστη `www-data` του Nginx. Ο `mas` έχει `sudo` μόνο για `stop`, `start` και `restart` της υπηρεσίας `alina-exams.service`, όχι γενικό `sudo`. Μετά από αλλαγή ομάδας χρειάζεται νέα σύνδεση SSH.
 
 ## Αλλαγή και deployment
 
-1. Διάβασε τα σχετικά αρχεία και την τρέχουσα κατάσταση της υπηρεσίας. Ο live φάκελος δεν είναι Git repository. Αν υπάρχει τοπικό checkout, σύγκρινέ το με τα live αρχεία πριν το χρησιμοποιήσεις. Αλλιώς φτιάξε τοπικό working copy **μόνο του κώδικα** μέσω SSH. Κράτησε hashes των live αρχείων που θα αντικαταστήσεις, ώστε να εντοπίσεις ενδιάμεσες αλλαγές.
+1. Διάβασε τα σχετικά αρχεία και την τρέχουσα κατάσταση της υπηρεσίας. Ο live φάκελος δεν είναι Git repository. Αν υπάρχει τοπικό checkout, σύγκρινέ το με τα live αρχεία πριν το χρησιμοποιήσεις. Αλλιώς φτιάξε τοπικό working copy μόνο του κώδικα μέσω SSH. Κράτησε hashes των live αρχείων που θα αντικαταστήσεις, ώστε να εντοπίσεις ενδιάμεσες αλλαγές. Μη συμπεριλάβεις το `data/` σε συνηθισμένο code sync.
 2. Κάνε την ελάχιστη αλλαγή και δοκίμασέ την με συνθετικά δεδομένα. Χρησιμοποίησε το υπάρχον `test_local_server.py` αν είναι διαθέσιμο στο checkout, έλεγχο σύνταξης Python και `node --check app.js` όπου υπάρχει Node. Μη θεωρείς ότι οι έλεγχοι σύνταξης αποδεικνύουν πως δουλεύει η εφαρμογή.
 3. Διατήρησε τα URL κάτω από `/other/alinas-exams/`: τα HTML assets είναι σχετικά paths, ενώ το `app.js` φτιάχνει API και PDF URLs μέσω `appUrl`. Μην επαναφέρεις απευθείας URLs τύπου `/api/...` ή `/app.js` που δείχνουν στη ρίζα του domain. Η υπηρεσία παίρνει data path, cookie path και secure-cookie flag από systemd.
 4. Πριν ανεβάσεις αλλαγές, έλεγξε ξανά τα hashes των αντίστοιχων live αρχείων. Αν άλλαξαν από άλλο χρήστη, σταμάτα και συνδύασε τις αλλαγές. Κράτησε αντίγραφο **μόνο των αρχείων κώδικα που αλλάζεις** σε ιδιωτικό υποφάκελο του `/home/mas/`. Μετέφερε μόνο τα αρχεία αυτά στο app directory με SSH/SCP/rsync. Διατήρησε την ομάδα `alina-exams-editors` και group write στα νέα αρχεία. Μη χρησιμοποιείς `rsync --delete` ή μαζικό `chmod`/`chown` σε γονικούς φακέλους.
@@ -25,4 +25,4 @@ description: Maintain and deploy code changes to the ALINA examinations web app 
 
 ## Δεδομένα και αλλαγές υποδομής
 
-Μην αντιγράφεις, διαβάζεις ή ανεβάζεις τη βάση ή τα PDF παραγωγής για δοκιμές, ούτε να βάζεις ιατρικά στοιχεία σε prompts ή cloud workspace. Αλλαγές schema, migration, backup/restore, εξαρτήσεων Python, Nginx, systemd, χρηστών και δικαιωμάτων χρειάζονται ξεχωριστή συνεννόηση με τον Nick. Ο `mas` δεν έχει τα απαραίτητα δικαιώματα για αυτές τις εργασίες. Αν η ζητούμενη αλλαγή τις απαιτεί, ετοίμασε τον κώδικα και τις ακριβείς απαιτούμενες ενέργειες και ζήτησε από τον Nick να τις εκτελέσει ή να δώσει τη σχετική πρόσβαση.
+Ο `mas` έχει άδεια να προσθέτει, αντικαθιστά και διαγράφει αρχεία βάσης/PDF όταν το ζητά ο χρήστης. Για τέτοιες εργασίες διάβασε πρώτα [τη διαδικασία δεδομένων](references/data-files.md). Μη χρησιμοποιείς πραγματικά ιατρικά δεδομένα για δοκιμές και μη βάζεις το περιεχόμενο της βάσης ή των PDF σε prompts, αρχεία skill ή cloud workspace. Αλλαγές σε εξαρτήσεις Python, Nginx, systemd, χρήστες και γενικά δικαιώματα εξακολουθούν να χρειάζονται ξεχωριστή συνεννόηση με τον Nick.
