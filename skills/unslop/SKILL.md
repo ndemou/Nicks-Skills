@@ -1,6 +1,6 @@
 ---
 name: unslop
-description: Remove common AI writing patterns from user-facing prose. Apply by default unless the user requests a conflicting style.
+description: Remove common AI writing patterns from user-facing prose. Apply when user requests simple direct language.
 ---
 
 # Unslop
