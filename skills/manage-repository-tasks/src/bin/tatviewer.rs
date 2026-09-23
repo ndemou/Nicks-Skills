@@ -19,7 +19,7 @@ const MERMAID_LICENSE: &str = include_str!("../../assets/MERMAID_LICENSE.txt");
     name = "tatviewer",
     version,
     about = "Export an interactive, self-contained HTML dashboard for tat tasks.",
-    long_about = "Export an interactive, self-contained HTML dashboard for tat tasks.\n\nThe default report starts with READY, BLOCKED, and RECENTLY DONE selected. Use --all to add OLD DONE cards; OLD DONE tasks are never included in the diagram. By default, recent means the 48-hour window ending at the repository's latest current completion. --recent accepts another number of hours or an inclusive oldest UTC calendar day. The collapsible Mermaid graph follows the task cards and can grow to its full natural height; the top-left graph button jumps to its stable #graph address. The Blocking flow view arranges dependencies left to right, with unrelated tasks listed separately. The Task families view shows the parent hierarchy without dependency arrows. Both views link to task cards. Truncated task details expand in place and render Markdown; relationship references provide delayed title-and-detail previews.",
+    long_about = "Export an interactive, self-contained HTML dashboard for tat tasks.\n\nThe default report starts with READY, BLOCKED, and RECENTLY DONE selected. Use --all to add OLD DONE cards; OLD DONE tasks are never included in the diagram. By default, recent means the 48-hour window ending at the repository's latest current completion. --recent accepts another number of hours or an inclusive oldest UTC calendar day. Task cards form an indented parent-child tree. The collapsible Mermaid graph follows the tree and can grow to its full natural height; the top-left graph button jumps to its stable #graph address. The graph arranges blocking dependencies left to right, with unrelated tasks listed separately. Graph references link back to task cards. Truncated task details expand in place and render Markdown; relationship references provide delayed title-and-detail previews.",
     after_help = "EXAMPLES:\n  tatviewer\n  tatviewer --all\n  tatviewer --recent 72 --output-path .\\tasks.html\n  tatviewer --recent 2026-08-01 --open"
 )]
 struct Cli {
@@ -429,9 +429,9 @@ fn build_mermaid_graph(
     lines.extend(tasks.iter().map(|task| mermaid_node(task, "  ")));
     lines.extend(edges);
     lines.extend([
-        "  classDef graphReady fill:#ddf5e8,stroke:#137a47,color:#0b5935,stroke-width:2px"
+        "  classDef graphReady fill:#ddf5e8,stroke:#137a47,color:#083e25,stroke-width:2px"
             .to_owned(),
-        "  classDef graphBlocked fill:#fee9e6,stroke:#b03a2e,color:#7f291f,stroke-width:2px"
+        "  classDef graphBlocked fill:#fee9e6,stroke:#b03a2e,color:#591d16,stroke-width:2px"
             .to_owned(),
         "  classDef graphDone fill:#e9edf1,stroke:#66717f,color:#46505c,stroke-width:1.5px"
             .to_owned(),
@@ -780,15 +780,17 @@ mod tests {
         assert!(html.contains("const graphTasks = tasks.filter"));
         assert!(html.contains("id=\"graph-jump\""));
         assert!(html.contains("<details class=\"graph-panel\" id=\"graph\" open"));
-        assert!(html.contains("animation: navigation-highlight 4.8s ease-out"));
+        assert!(html.contains("animation: navigation-highlight 2.88s ease-out"));
         assert!(html.contains("background-color: #FFFF50"));
-        assert!(html.contains("}, 4800);"));
+        assert!(html.contains("}, 2880);"));
         assert!(!html.contains("box-shadow: 0 0 0 4px color-mix"));
         assert!(html.contains("overflow-y: visible"));
         assert!(html.contains("max-height: none"));
         assert!(html.contains("wrappingWidth: 180"));
         assert!(!html.contains("setDashboardView(view, options = {})"));
-        assert!(html.contains(".task-card[data-status=\"ready\"] .description-text"));
+        assert!(!html.contains(".task-card[data-status=\"ready\"] .description-text"));
+        assert!(html.contains(".ref-title-ready"));
+        assert!(html.contains("class=\"reset-icon\""));
         assert!(html.contains("globalThis[\"mermaid\"]"));
         assert!(html.contains("The MIT License (MIT)"));
         assert!(!html.contains("__TATVIEWER_"));
@@ -804,12 +806,14 @@ mod tests {
         let gate_graph = build_mermaid_graph(&value, &RecentWindow::Hours(48)).unwrap();
         assert!(gate_graph.contains("t_abcd{\"t@abcd: Sample\"}"));
         assert!(gate_graph.contains("class t_abcd graphReady"));
+        assert!(gate_graph.contains("color:#083e25"));
 
         value.tasks[0].task_type = "BUG".to_owned();
         value.tasks[0].status = "blocked".to_owned();
         let bug_graph = build_mermaid_graph(&value, &RecentWindow::Hours(48)).unwrap();
         assert!(bug_graph.contains("t_abcd{{\"t@abcd: Sample\"}}"));
         assert!(bug_graph.contains("class t_abcd graphBlocked"));
+        assert!(bug_graph.contains("color:#591d16"));
 
         value.tasks[0].task_type = "FEATURE".to_owned();
         value.tasks[0].status = "done".to_owned();
@@ -850,8 +854,9 @@ mod tests {
         assert!(!graph.contains("subgraph"));
         assert!(!graph.contains(" --> "));
         let html = render_html(&value, false, &RecentWindow::Hours(48)).unwrap();
-        assert!(html.contains("id=\"graph-families\""));
-        assert!(html.contains("renderGraphFamilies()"));
+        assert!(html.contains("createTaskTreeItems"));
+        assert!(!html.contains("id=\"graph-families\""));
+        assert!(!html.contains("renderGraphFamilies"));
     }
 
     #[test]
@@ -914,7 +919,7 @@ mod tests {
             + "<script id=\"task-data\" type=\"application/json\">".len();
         let end = start + html[start..].find("</script>").unwrap();
         let exported: serde_json::Value = serde_json::from_str(&html[start..end]).unwrap();
-        // Every task and parent relationship remains available in Task families.
+        // Every task and parent relationship remains available to the issue tree.
         assert_eq!(exported, serde_json::to_value(&value).unwrap());
     }
 

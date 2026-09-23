@@ -80,7 +80,7 @@ fn embedded_graph(html: &str) -> String {
 }
 
 #[test]
-fn exports_a_self_contained_dashboard_with_separate_blocking_and_family_views() {
+fn exports_a_self_contained_dashboard_with_issue_tree_and_blocking_graph() {
     let repo = repository();
     let parent = created_id(
         repo.path(),
@@ -139,9 +139,44 @@ fn exports_a_self_contained_dashboard_with_separate_blocking_and_family_views() 
     assert!(html.contains("<p class=\"eyebrow\">tat dashboard</p>"));
     assert!(!html.contains("tat task dashboard"));
     assert!(html.contains("class=\"result-count header-result-count\" id=\"result-count\""));
+    assert!(html.contains("class=\"header-toolbar\""));
+    assert!(html.contains(".header-toolbar {\n      display: flex;\n      flex-wrap: wrap;"));
+    assert!(html.contains(
+        ".summary,\n    .type-summary {\n      display: flex;\n      flex: 0 1 auto;\n      flex-wrap: wrap;"
+    ));
+    assert!(html.contains("class=\"header-separator\" aria-hidden=\"true\">|</span>"));
+    assert!(html.contains("#repository-name {"));
+    assert!(html.contains("font-size: 1rem;\n      font-weight: 650;"));
+    assert!(html.contains("--font-ui: \"Segoe UI Variable Text\", Aptos"));
+    assert!(html.contains("--font-display: \"Segoe UI Variable Display\""));
+    assert!(html.contains("--font-mono: \"Cascadia Mono\""));
+    assert!(html.contains("font-family: var(--font-ui)"));
+    assert!(html.contains("font-optical-sizing: auto"));
+    assert!(html.contains("--text: #202a35"));
+    assert!(html.contains("--accent: #2468b2"));
+    assert!(html.contains("transform: rotate(180deg)"));
+    assert!(html.contains(".summary-button,\n    .type-filter-button,\n    .clear-button"));
+    assert!(html.contains("flex: 0 0 2rem"));
+    assert!(html.contains(".search-control:focus-within"));
+    assert!(html.contains(".search-control:has(input:not(:placeholder-shown))"));
+    assert!(html.contains("class=\"reset-icon\""));
+    assert!(html.contains("stroke=\"currentColor\""));
+    assert!(!html.contains("🔄"));
+    assert!(!html.contains("class=\"heading-row\""));
+    assert!(!html.contains("class=\"filter-stack\""));
+    assert!(!html.contains("class=\"controls\""));
+    let toolbar_end = html
+        .find("</div>\n      <p class=\"result-count header-result-count\"")
+        .unwrap();
+    assert!(html.find("class=\"header-toolbar\"").unwrap() < toolbar_end);
+    assert!(html.find("id=\"repository-name\"").unwrap() < toolbar_end);
+    assert!(html.find("data-status-filter=\"ready\"").unwrap() < toolbar_end);
+    assert!(html.find("data-type-filter=\"BUG\"").unwrap() < toolbar_end);
+    assert!(html.find("id=\"search\"").unwrap() < toolbar_end);
+    assert!(html.find("id=\"clear-filters\"").unwrap() < toolbar_end);
     assert!(!html.contains("snapshot-meta"));
     assert!(html.contains("aria-label=\"Search tasks\""));
-    assert!(html.contains("aria-label=\"Sort tasks\""));
+    assert!(!html.contains("aria-label=\"Sort tasks\""));
     assert!(html.contains("class=\"control-icon\""));
     assert!(html.contains("id=\"task-graph\""));
     assert!(html.contains("id=\"graph-jump\""));
@@ -152,9 +187,22 @@ fn exports_a_self_contained_dashboard_with_separate_blocking_and_family_views() 
     assert!(html.contains("history.pushState(null, \"\", \"#graph\")"));
     assert!(html.contains("window.location.hash === \"#graph\""));
     assert!(html.contains("focusGraph(false)"));
-    assert!(html.contains("animation: navigation-highlight 4.8s ease-out"));
+    assert!(html.contains("animation: navigation-highlight 2.88s ease-out"));
     assert!(html.contains("background-color: #FFFF50"));
-    assert!(html.contains("}, 4800);"));
+    assert!(html.contains("}, 2880);"));
+    assert!(html.contains("--ready-text: color-mix(in srgb, var(--ready) 70%, black)"));
+    assert!(html.contains("--blocked-text: color-mix(in srgb, var(--blocked) 70%, black)"));
+    assert!(html.contains("--ready-rail: #42965E"));
+    assert!(html.contains("--blocked-rail: #9E453F"));
+    assert!(html.contains("border-left-color: var(--ready-rail)"));
+    assert!(html.contains("border-left-color: var(--blocked-rail)"));
+    assert!(html.contains("--type-bug: #8F4512"));
+    assert!(html.contains("--type-feature: #5B4796"));
+    assert!(html.contains("--type-task: #1F6483"));
+    assert!(html.contains(".badge-type-bug"));
+    assert!(html.contains(".badge-type-feature"));
+    assert!(html.contains(".badge-type-task"));
+    assert!(html.contains("`badge-type-${task.type.toLowerCase()}`"));
     assert!(!html.contains("box-shadow: 0 0 0 4px color-mix"));
     assert!(html.contains("overflow-y: visible"));
     assert!(html.contains("max-height: none"));
@@ -168,15 +216,24 @@ fn exports_a_self_contained_dashboard_with_separate_blocking_and_family_views() 
     );
     assert!(!html.contains("id=\"view-toggle\""));
     assert!(!html.contains("id=\"graph-workspace\""));
+    assert!(!html.contains("id=\"graph-families\""));
+    assert!(!html.contains("graph-families-button"));
+    assert!(!html.contains("renderGraphFamilies"));
     assert!(html.contains("renderTaskGraph"));
     assert!(html.contains("task-graph-link"));
     assert!(html.contains("boldGraphTaskId(graphElement, task)"));
     assert!(html.contains("findGraphTaskElement"));
     assert!(html.contains("arrows show BLOCKS, left to right"));
     assert!(html.contains("class=\"graph-key\""));
-    assert!(html.contains(".task-card[data-status=\"ready\"] .description-text"));
-    assert!(html.contains(".task-card[data-status=\"blocked\"] .description-text"));
-    assert!(html.contains(".task-card[data-status=\"done\"] .description-text"));
+    assert!(!html.contains(".task-card[data-status=\"ready\"] .description-text"));
+    assert!(!html.contains(".task-card[data-status=\"blocked\"] .description-text"));
+    assert!(!html.contains(".task-card[data-status=\"done\"] .description-text"));
+    assert!(html.contains(".ref-title-ready {\n      color: var(--ready-text);"));
+    assert!(html.contains(".ref-title-blocked {\n      color: var(--blocked-text);"));
+    assert!(html.contains("border-radius: 8px;\n      background: var(--surface-muted);"));
+    assert!(html.contains("font-size: clamp(1rem, 1.5vw, 1.16rem);\n      font-weight: 600;"));
+    assert!(html.contains("font-size: 0.86rem;\n      line-height: 1.48;"));
+    assert!(html.contains("font-size: 0.87rem;\n      line-height: 1.52;"));
     assert!(html.contains("globalThis[\"mermaid\"]"));
     assert!(html.contains("The MIT License (MIT)"));
     assert!(html.contains("createTaskReference"));
@@ -191,12 +248,37 @@ fn exports_a_self_contained_dashboard_with_separate_blocking_and_family_views() 
     assert!(html.contains("data-type-filter=\"TASK\""));
     assert!(html.contains("data-type-filter=\"GATE\""));
     assert!(!html.contains("id=\"type-filter\""));
+    assert!(!html.contains("id=\"sort\""));
+    assert!(!html.contains("compareTasks"));
+    assert!(!html.contains("directReferences"));
+    assert!(html.contains("function taskSearchText(task)"));
+    assert!(html.contains("createTreeView"));
+    assert!(html.contains("task-card-context"));
+    assert!(html.contains("shown for context"));
+    assert!(html.contains("compact ? task.status.charAt(0).toUpperCase() : task.status"));
     assert!(html.contains("makeElement(\"div\", \"card-headline\")"));
     assert!(html.contains(".card-headline .description-toggle"));
     assert!(html.contains("Click for full details"));
     assert!(!html.contains("Show full details"));
     assert!(html.contains("createDetails"));
+    assert!(html.contains("createBlockedByRelationship"));
     assert!(html.contains("createCompactRelationships"));
+    assert!(html.contains("createTaskTreeItems"));
+    assert!(html.contains(".task-tree-children"));
+    assert!(html.contains("border-left: 2px solid #545F6B"));
+    assert!(html.contains("border-top: 2px solid #545F6B"));
+    assert!(html.contains(".task-tree-parent-link"));
+    assert!(html.contains("left: calc(-1 * var(--tree-indent) - 4px)"));
+    assert!(html.contains("width: 10px"));
+    assert!(html.contains("navigateToTask(parentTask.id, true)"));
+    assert!(html.contains(".card-status-rail"));
+    assert!(html.contains("writing-mode: vertical-rl"));
+    assert!(html.contains("createCardStatusRail"));
+    assert!(html.contains("colorTitleByStatus: true"));
+    assert!(!html.contains("[\"CHILDREN\", relationships.children || []]"));
+    assert!(html.contains("return createBadge(`${label}:`, \"badge-blocked\")"));
+    assert!(html.contains("hideBlockedStatus: label === \"BLOCKS\""));
+    assert!(!html.contains("createParentRelationship"));
     assert!(html.contains("reference.status !== \"done\""));
     assert!(html.contains("isVisuallyTruncated"));
     assert!(html.contains("showPreview: false"));

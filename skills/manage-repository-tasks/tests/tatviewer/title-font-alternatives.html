@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+  <title>Issue title font alternatives</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --background: #f4f6f8;
+      --surface: #ffffff;
+      --surface-muted: #eef1f4;
+      --text: #18212b;
+      --muted: #647180;
+      --border: #d8dee5;
+      --ready: #137a47;
+      --ready-rail: #42965E;
+      --ready-soft: #ddf5e8;
+      --ready-text: color-mix(in srgb, var(--ready) 70%, black);
+      --blocked: #b03a2e;
+      --blocked-rail: #9E453F;
+      --blocked-soft: #fee9e6;
+      --blocked-text: color-mix(in srgb, var(--blocked) 70%, black);
+      --type-bug: #8F4512;
+      --type-bug-soft: #FBE9D8;
+      --type-feature: #5B4796;
+      --type-feature-soft: #EEEAFB;
+      --shadow: 0 8px 24px rgba(20, 32, 48, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--background);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.45;
+    }
+
+    main {
+      width: min(100% - 2rem, 980px);
+      margin: 2rem auto;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.45rem;
+    }
+
+    .intro {
+      margin: 0.4rem 0 1.25rem;
+      color: var(--muted);
+    }
+
+    .options {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+      gap: 0.85rem;
+    }
+
+    .option {
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .option-heading {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.65rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface-muted);
+    }
+
+    .option-heading h2 {
+      margin: 0;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .option-heading span {
+      color: var(--muted);
+      font-size: 0.76rem;
+      text-align: right;
+    }
+
+    .selected {
+      color: #1769e0;
+      font-weight: 750;
+    }
+
+    .issue {
+      position: relative;
+      padding: 0.7rem 0.75rem;
+      border-left: 1.55rem solid var(--ready-rail);
+    }
+
+    .issue + .issue {
+      border-top: 1px solid var(--border);
+      border-left-color: var(--blocked-rail);
+    }
+
+    .issue::before {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: -1.55rem;
+      display: flex;
+      width: 1.55rem;
+      align-items: center;
+      justify-content: center;
+      color: var(--surface);
+      font-size: 0.64rem;
+      font-weight: 850;
+      letter-spacing: 0.04em;
+      line-height: 1;
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+    }
+
+    .issue.ready::before {
+      content: "READY";
+    }
+
+    .issue.blocked::before {
+      content: "BLOCKED";
+    }
+
+    .issue-line {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .issue-id {
+      color: #1769e0;
+      font-size: 0.82rem;
+      font-weight: 800;
+    }
+
+    .title {
+      font-size: 0.97rem;
+      line-height: 1.25;
+    }
+
+    .ready .title {
+      color: var(--ready-text);
+    }
+
+    .blocked .title {
+      color: var(--blocked-text);
+    }
+
+    .pills {
+      display: inline-flex;
+      gap: 0;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 20px;
+      padding: 0.08rem 0.38rem;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--surface-muted);
+      color: var(--muted);
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .pill-bug {
+      border-color: color-mix(in srgb, var(--type-bug) 45%, var(--border));
+      background: var(--type-bug-soft);
+      color: var(--type-bug);
+    }
+
+    .pill-feature {
+      border-color: color-mix(in srgb, var(--type-feature) 45%, var(--border));
+      background: var(--type-feature-soft);
+      color: var(--type-feature);
+    }
+
+    .option-1 .title {
+      font-weight: 650;
+    }
+
+    .option-2 .title {
+      font-weight: 600;
+    }
+
+    .option-3 .title {
+      font-weight: 550;
+    }
+
+    .option-4 .title {
+      font-weight: 500;
+    }
+
+    .option-5 .title {
+      font-family: "Segoe UI Variable Text", "Segoe UI", sans-serif;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    @media (max-width: 520px) {
+      main {
+        width: min(100% - 1rem, 980px);
+        margin-block: 1rem;
+      }
+
+      .options {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Issue title font alternatives</h1>
+    <p class="intro">The selected title weight is 600. Type and priority pills stay at 800; status appears in the left rail.</p>
+
+    <div class="options">
+      <section class="option option-1">
+        <header class="option-heading">
+          <h2>1. Light reduction</h2>
+          <span>Current family · weight 650</span>
+        </header>
+        <div class="issue ready">
+          <div class="issue-line">
+            <span class="issue-id">t@m46p</span>
+            <span class="title">Automate the sample application development workflow</span>
+            <span class="pills"><span class="pill pill-feature">Feature</span><span class="pill">P2</span></span>
+          </div>
+        </div>
+        <div class="issue blocked">
+          <div class="issue-line">
+            <span class="issue-id">t@r7km</span>
+            <span class="title">Recover interrupted object imports without losing changes</span>
+            <span class="pills"><span class="pill pill-bug">Bug</span><span class="pill">P1</span></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="option option-2">
+        <header class="option-heading">
+          <h2>2. Balanced <span class="selected">selected</span></h2>
+          <span>Current family · weight 600</span>
+        </header>
+        <div class="issue ready">
+          <div class="issue-line">
+            <span class="issue-id">t@m46p</span>
+            <span class="title">Automate the sample application development workflow</span>
+            <span class="pills"><span class="pill pill-feature">Feature</span><span class="pill">P2</span></span>
+          </div>
+        </div>
+        <div class="issue blocked">
+          <div class="issue-line">
+            <span class="issue-id">t@r7km</span>
+            <span class="title">Recover interrupted object imports without losing changes</span>
+            <span class="pills"><span class="pill pill-bug">Bug</span><span class="pill">P1</span></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="option option-3">
+        <header class="option-heading">
+          <h2>3. Medium-light</h2>
+          <span>Current family · weight 550</span>
+        </header>
+        <div class="issue ready">
+          <div class="issue-line">
+            <span class="issue-id">t@m46p</span>
+            <span class="title">Automate the sample application development workflow</span>
+            <span class="pills"><span class="pill pill-feature">Feature</span><span class="pill">P2</span></span>
+          </div>
+        </div>
+        <div class="issue blocked">
+          <div class="issue-line">
+            <span class="issue-id">t@r7km</span>
+            <span class="title">Recover interrupted object imports without losing changes</span>
+            <span class="pills"><span class="pill pill-bug">Bug</span><span class="pill">P1</span></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="option option-4">
+        <header class="option-heading">
+          <h2>4. Quiet</h2>
+          <span>Current family · weight 500</span>
+        </header>
+        <div class="issue ready">
+          <div class="issue-line">
+            <span class="issue-id">t@m46p</span>
+            <span class="title">Automate the sample application development workflow</span>
+            <span class="pills"><span class="pill pill-feature">Feature</span><span class="pill">P2</span></span>
+          </div>
+        </div>
+        <div class="issue blocked">
+          <div class="issue-line">
+            <span class="issue-id">t@r7km</span>
+            <span class="title">Recover interrupted object imports without losing changes</span>
+            <span class="pills"><span class="pill pill-bug">Bug</span><span class="pill">P1</span></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="option option-5">
+        <header class="option-heading">
+          <h2>5. Softer typeface</h2>
+          <span>Segoe UI Variable Text · weight 600</span>
+        </header>
+        <div class="issue ready">
+          <div class="issue-line">
+            <span class="issue-id">t@m46p</span>
+            <span class="title">Automate the sample application development workflow</span>
+            <span class="pills"><span class="pill pill-feature">Feature</span><span class="pill">P2</span></span>
+          </div>
+        </div>
+        <div class="issue blocked">
+          <div class="issue-line">
+            <span class="issue-id">t@r7km</span>
+            <span class="title">Recover interrupted object imports without losing changes</span>
+            <span class="pills"><span class="pill pill-bug">Bug</span><span class="pill">P1</span></span>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

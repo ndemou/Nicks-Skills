@@ -8,44 +8,63 @@
   <style>
     :root {
       color-scheme: light dark;
-      --background: #f4f6f8;
+      --font-ui: "Segoe UI Variable Text", Aptos, "Segoe UI", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-display: "Segoe UI Variable Display", "Aptos Display", var(--font-ui);
+      --font-mono: "Cascadia Mono", "Cascadia Code", Consolas, ui-monospace, monospace;
+      --background: #f3f5f7;
       --surface: #ffffff;
       --surface-raised: #ffffff;
-      --surface-muted: #eef1f4;
-      --text: #18212b;
-      --muted: #647180;
-      --border: #d8dee5;
-      --accent: #1769e0;
-      --accent-soft: #e6f0ff;
+      --surface-muted: #eef2f5;
+      --text: #202a35;
+      --muted: #617080;
+      --border: #d5dde5;
+      --accent: #2468b2;
+      --accent-soft: #e8f1fb;
       --ready: #137a47;
+      --ready-rail: #42965E;
       --ready-soft: #ddf5e8;
       --blocked: #b03a2e;
+      --blocked-rail: #9E453F;
       --blocked-soft: #fee9e6;
+      --ready-text: color-mix(in srgb, var(--ready) 70%, black);
+      --blocked-text: color-mix(in srgb, var(--blocked) 70%, black);
       --done: #66717f;
       --done-soft: #e9edf1;
+      --type-bug: #8F4512;
+      --type-bug-soft: #FBE9D8;
+      --type-feature: #5B4796;
+      --type-feature-soft: #EEEAFB;
+      --type-task: #1F6483;
+      --type-task-soft: #E3F2F8;
       --warning: #9a6200;
       --warning-soft: #fff2cf;
-      --shadow: 0 8px 24px rgba(20, 32, 48, 0.08);
+      --shadow: 0 6px 18px rgba(31, 45, 61, 0.07);
       --radius: 14px;
     }
 
     @media (prefers-color-scheme: dark) {
       :root {
-        --background: #10151b;
-        --surface: #171e26;
-        --surface-raised: #1c2530;
-        --surface-muted: #222c37;
-        --text: #edf2f7;
-        --muted: #a7b2bf;
-        --border: #34404d;
-        --accent: #70a7ff;
-        --accent-soft: #1b365d;
+        --background: #111820;
+        --surface: #18212a;
+        --surface-raised: #1d2732;
+        --surface-muted: #242f3a;
+        --text: #e7edf3;
+        --muted: #a9b4bf;
+        --border: #35414e;
+        --accent: #7aafea;
+        --accent-soft: #1d3957;
         --ready: #66d39a;
         --ready-soft: #183b2b;
         --blocked: #ff9388;
         --blocked-soft: #4b2624;
         --done: #b4bec8;
         --done-soft: #2c3540;
+        --type-bug: #F3AD78;
+        --type-bug-soft: #452B1D;
+        --type-feature: #C0B0F7;
+        --type-feature-soft: #30294B;
+        --type-task: #82C7E8;
+        --type-task-soft: #1D3947;
         --warning: #ffd178;
         --warning-soft: #483719;
         --shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
@@ -65,21 +84,22 @@
       min-width: 320px;
       background: var(--background);
       color: var(--text);
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      line-height: 1.45;
+      font-family: var(--font-ui);
+      font-optical-sizing: auto;
+      font-kerning: normal;
+      line-height: 1.5;
+      text-rendering: optimizeLegibility;
     }
 
     button,
-    input,
-    select {
+    input {
       color: inherit;
       font: inherit;
     }
 
     button,
     a,
-    input,
-    select {
+    input {
       outline-offset: 3px;
     }
 
@@ -120,39 +140,29 @@
     }
 
     .header-inner {
-      padding: 1rem 0 0.85rem;
+      padding: 0.5rem 0 0.42rem;
     }
 
-    .heading-row {
+    .header-toolbar {
       display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 1.5rem;
-    }
-
-    .heading-primary {
-      display: flex;
+      flex-wrap: wrap;
       align-items: center;
       min-width: 0;
-      gap: 0.7rem;
-    }
-
-    .repository-heading {
-      min-width: 0;
+      gap: 0.32rem;
+      white-space: nowrap;
     }
 
     .graph-jump-button {
       display: grid;
       flex: 0 0 auto;
-      width: 3.65rem;
-      height: 3.65rem;
+      width: 2rem;
+      height: 2rem;
       place-items: center;
-      padding: 0.35rem;
+      padding: 0.22rem;
       border: 1px solid var(--border);
-      border-radius: 11px;
+      border-radius: 8px;
       background: var(--surface-raised);
       color: var(--text);
-      box-shadow: var(--shadow);
       cursor: pointer;
     }
 
@@ -162,62 +172,77 @@
     }
 
     .graph-jump-button svg {
-      width: 2.45rem;
-      height: 2.45rem;
+      width: 1.35rem;
+      height: 1.35rem;
+      transform: rotate(180deg);
     }
 
     .eyebrow {
-      margin: 0 0 0.2rem;
+      flex: 0 0 auto;
+      margin: 0;
       color: var(--accent);
-      font-size: 0.72rem;
-      font-weight: 800;
-      letter-spacing: 0.13em;
+      font-family: var(--font-display);
+      font-size: 0.7rem;
+      font-weight: 750;
+      letter-spacing: 0.085em;
       text-transform: uppercase;
     }
 
-    h1 {
+    #repository-name {
+      min-width: 8rem;
+      max-width: min(28vw, 26rem);
       margin: 0;
-      font-size: clamp(1.35rem, 2.5vw, 2rem);
-      line-height: 1.15;
+      overflow: hidden;
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 650;
+      letter-spacing: -0.01em;
+      line-height: 1.25;
+      text-overflow: ellipsis;
+    }
+
+    .header-separator {
+      flex: 0 0 auto;
+      color: var(--border);
+      font-weight: 700;
     }
 
     .header-result-count {
-      margin: 0.35rem 0 0;
+      margin: 0.28rem 0 0;
       color: var(--muted);
-      font-size: 0.9rem;
-      font-weight: 800;
+      font-size: 0.78rem;
+      font-weight: 650;
+      letter-spacing: 0.005em;
     }
 
-    .summary {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(104px, 1fr));
-      gap: 0.5rem;
-      min-width: min(100%, 560px);
-    }
-
-    .filter-stack {
-      display: grid;
-      gap: 0.38rem;
-      min-width: min(100%, 560px);
-    }
-
+    .summary,
     .type-summary {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 0.38rem;
+      display: flex;
+      flex: 0 1 auto;
+      flex-wrap: wrap;
+      min-width: 0;
+      gap: 0.22rem;
     }
 
-    .summary-button {
-      display: grid;
-      grid-template-columns: auto auto;
-      align-items: baseline;
+    .summary-button,
+    .type-filter-button,
+    .clear-button {
+      display: inline-flex;
+      min-height: 30px;
+      align-items: center;
       justify-content: center;
-      gap: 0.35rem;
-      min-height: 44px;
-      padding: 0.45rem 0.65rem;
+      gap: 0.24rem;
+      padding: 0.25rem 0.48rem;
       border: 1px solid var(--border);
-      border-radius: 10px;
+      border-radius: 8px;
       background: var(--surface-muted);
+      color: var(--muted);
+      font-size: 0.68rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.025em;
+      line-height: 1;
+      text-transform: uppercase;
       cursor: pointer;
     }
 
@@ -228,76 +253,84 @@
       box-shadow: inset 0 0 0 1px var(--accent);
     }
 
-    .type-filter-button {
-      min-height: 30px;
-      padding: 0.25rem 0.45rem;
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      background: var(--surface-muted);
-      color: var(--muted);
-      font-size: 0.68rem;
-      font-weight: 800;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      cursor: pointer;
-    }
-
     .summary-count {
-      font-size: 1.15rem;
-      font-weight: 800;
+      font: inherit;
     }
 
     .summary-label {
-      color: var(--muted);
-      font-size: 0.75rem;
-      font-weight: 700;
-      text-transform: uppercase;
+      color: inherit;
+      font: inherit;
       white-space: nowrap;
     }
 
-    .controls {
-      display: grid;
-      grid-template-columns: minmax(220px, 1fr) minmax(150px, 0.3fr) auto;
-      gap: 0.65rem;
-      margin-top: 0.85rem;
-    }
-
-    .control {
+    .search-control {
       position: relative;
       display: flex;
+      flex: 0 0 2rem;
+      width: 2rem;
       align-items: center;
+      transition: width 150ms ease, flex-basis 150ms ease;
     }
 
     .control-icon {
       position: absolute;
       z-index: 1;
-      left: 0.62rem;
+      left: 0.5rem;
       width: 1rem;
       height: 1rem;
       color: var(--muted);
       pointer-events: none;
     }
 
-    input,
-    select,
-    .clear-button,
+    .search-control input {
+      width: 100%;
+      min-height: 30px;
+      padding: 0.25rem 0.45rem 0.25rem 1.75rem;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--surface-muted);
+      color: transparent;
+      cursor: pointer;
+    }
+
+    .search-control input::placeholder {
+      color: transparent;
+    }
+
+    .search-control:focus-within,
+    .search-control:has(input:not(:placeholder-shown)) {
+      flex-basis: min(14rem, 24vw);
+      width: min(14rem, 24vw);
+    }
+
+    .search-control:focus-within input,
+    .search-control:has(input:not(:placeholder-shown)) input {
+      color: inherit;
+      cursor: text;
+    }
+
+    .search-control:focus-within input::placeholder {
+      color: var(--muted);
+    }
+
+    .clear-button {
+      width: 2rem;
+      padding-inline: 0;
+      text-transform: none;
+    }
+
+    .reset-icon {
+      display: block;
+      width: 1rem;
+      height: 1rem;
+    }
+
     .return-button {
       min-height: 36px;
+      padding: 0.35rem 0.78rem;
       border: 1px solid var(--border);
       border-radius: 9px;
       background: var(--surface);
-    }
-
-    input,
-    select {
-      width: 100%;
-      padding: 0.38rem 0.7rem 0.38rem 2rem;
-    }
-
-    .clear-button,
-    .return-button {
-      align-self: end;
-      padding: 0.35rem 0.78rem;
       font-weight: 700;
       cursor: pointer;
     }
@@ -347,7 +380,8 @@
       gap: 1rem;
       padding: 0.62rem 0.8rem;
       cursor: pointer;
-      font-weight: 800;
+      font-family: var(--font-display);
+      font-weight: 700;
     }
 
     .graph-panel > summary::marker {
@@ -366,7 +400,7 @@
     .graph-legend {
       color: var(--muted);
       font-size: 0.75rem;
-      font-weight: 650;
+      font-weight: 600;
     }
 
     .graph-key {
@@ -377,7 +411,7 @@
       padding: 0 0.8rem 0.55rem;
       color: var(--muted);
       font-size: 0.7rem;
-      font-weight: 750;
+      font-weight: 650;
     }
 
     .graph-key-item {
@@ -405,12 +439,12 @@
 
     .graph-key-ready {
       background: var(--ready-soft);
-      color: var(--ready);
+      color: var(--ready-text);
     }
 
     .graph-key-blocked {
       background: var(--blocked-soft);
-      color: var(--blocked);
+      color: var(--blocked-text);
     }
 
     .graph-key-done {
@@ -438,29 +472,7 @@
       margin-inline: auto;
     }
 
-    .graph-views {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      padding: 0 0.8rem 0.65rem;
-    }
-
-    .graph-view-button {
-      padding: 0.45rem 0.8rem;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      background: var(--surface);
-      cursor: pointer;
-    }
-
-    .graph-view-button[aria-pressed="true"] {
-      color: var(--accent);
-      background: var(--accent-soft);
-      border-color: var(--accent);
-    }
-
-    .graph-supplement,
-    .graph-families {
+    .graph-supplement {
       padding: 0.8rem;
       border-top: 1px solid var(--border);
     }
@@ -513,28 +525,12 @@
       font-size: 0.75rem;
     }
 
-    .graph-family-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-
-    .graph-family-list li + li {
-      margin-top: 0.5rem;
-    }
-
-    .graph-family-list .graph-family-list {
-      margin: 0.5rem 0 0.75rem 0.65rem;
-      padding-left: 0.65rem;
-      border-left: 1px solid var(--border);
-    }
-
     .task-graph .task-graph-link {
       cursor: pointer;
     }
 
     .task-graph-id {
-      font-weight: 850;
+      font-weight: 750;
     }
 
     .task-graph .task-graph-link rect,
@@ -564,7 +560,7 @@
       margin: 0;
       color: var(--muted);
       font-size: 0.9rem;
-      font-weight: 800;
+      font-weight: 700;
     }
 
     .task-list {
@@ -577,24 +573,61 @@
     }
 
     .task-card {
+      position: relative;
+      min-width: 0;
+    }
+
+    .task-card-context > .task-article {
+      opacity: 0.55;
+    }
+
+    .task-article {
+      --status-rail-width: 1.55rem;
+      position: relative;
+      z-index: 1;
       border: 1px solid var(--border);
       border-left: 5px solid var(--done);
       border-radius: var(--radius);
       background: var(--surface-raised);
       box-shadow: var(--shadow);
       transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+      padding: 0.9rem 1rem 1rem;
     }
 
-    .task-card[data-status="ready"] {
-      border-left-color: var(--ready);
+    .task-card[data-status="ready"] > .task-article {
+      border-left-width: var(--status-rail-width);
+      border-left-color: var(--ready-rail);
     }
 
-    .task-card[data-status="blocked"] {
-      border-left-color: var(--blocked);
+    .task-card[data-status="blocked"] > .task-article {
+      border-left-width: var(--status-rail-width);
+      border-left-color: var(--blocked-rail);
     }
 
-    .task-card.navigation-target {
-      animation: navigation-highlight 4.8s ease-out;
+    .card-status-rail {
+      position: absolute;
+      z-index: 2;
+      top: 0;
+      bottom: 0;
+      left: calc(-1 * var(--status-rail-width));
+      display: flex;
+      width: var(--status-rail-width);
+      align-items: center;
+      justify-content: center;
+      color: var(--surface-raised);
+      font-size: 0.64rem;
+      font-weight: 750;
+      letter-spacing: 0.055em;
+      line-height: 1;
+      text-transform: uppercase;
+      white-space: nowrap;
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      pointer-events: none;
+    }
+
+    .task-card.navigation-target > .task-article {
+      animation: navigation-highlight 2.88s ease-out;
     }
 
     @keyframes navigation-highlight {
@@ -607,8 +640,53 @@
       }
     }
 
-    .task-article {
-      padding: 0.9rem 1rem 1rem;
+    .task-tree-children {
+      --tree-indent: 1.35rem;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0.55rem;
+      margin: 0.55rem 0 0 0.7rem;
+      padding: 0 0 0 var(--tree-indent);
+      list-style: none;
+    }
+
+    .task-tree-children > .task-card::before,
+    .task-tree-children > .task-card::after {
+      content: "";
+      position: absolute;
+      left: calc(-1 * var(--tree-indent));
+    }
+
+    .task-tree-children > .task-card::before {
+      top: -0.55rem;
+      bottom: -0.55rem;
+      border-left: 2px solid #545F6B;
+    }
+
+    .task-tree-children > .task-card:last-child::before {
+      bottom: auto;
+      height: calc(0.55rem + 1.25rem);
+    }
+
+    .task-tree-children > .task-card::after {
+      top: 1.25rem;
+      width: var(--tree-indent);
+      border-top: 2px solid #545F6B;
+    }
+
+    .task-tree-parent-link {
+      position: absolute;
+      z-index: 2;
+      top: -0.55rem;
+      bottom: -0.55rem;
+      left: calc(-1 * var(--tree-indent) - 4px);
+      width: 10px;
+      cursor: pointer;
+    }
+
+    .task-tree-children > .task-card:last-child > .task-tree-parent-link {
+      bottom: auto;
+      height: calc(0.55rem + 1.25rem);
     }
 
     .card-topline {
@@ -631,9 +709,9 @@
     .task-id,
     .task-link {
       color: var(--accent);
-      font-family: ui-monospace, "Cascadia Code", "SFMono-Regular", Consolas, monospace;
-      font-size: 0.86rem;
-      font-weight: 800;
+      font-family: var(--font-mono);
+      font-size: 0.84rem;
+      font-weight: 700;
       direction: ltr;
       unicode-bidi: isolate;
     }
@@ -709,8 +787,9 @@
       background: var(--surface-muted);
       color: var(--muted);
       font-size: 0.7rem;
-      font-weight: 800;
-      letter-spacing: 0.03em;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.025em;
       text-transform: uppercase;
       white-space: nowrap;
     }
@@ -719,20 +798,38 @@
     .ref-status-ready {
       border-color: color-mix(in srgb, var(--ready) 35%, var(--border));
       background: var(--ready-soft);
-      color: var(--ready);
+      color: var(--ready-text);
     }
 
     .badge-blocked,
     .ref-status-blocked {
       border-color: color-mix(in srgb, var(--blocked) 35%, var(--border));
       background: var(--blocked-soft);
-      color: var(--blocked);
+      color: var(--blocked-text);
     }
 
     .badge-done,
     .ref-status-done {
       background: var(--done-soft);
       color: var(--done);
+    }
+
+    .badge-type-bug {
+      border-color: color-mix(in srgb, var(--type-bug) 45%, var(--border));
+      background: var(--type-bug-soft);
+      color: var(--type-bug);
+    }
+
+    .badge-type-feature {
+      border-color: color-mix(in srgb, var(--type-feature) 45%, var(--border));
+      background: var(--type-feature-soft);
+      color: var(--type-feature);
+    }
+
+    .badge-type-task {
+      border-color: color-mix(in srgb, var(--type-task) 45%, var(--border));
+      background: var(--type-task-soft);
+      color: var(--type-task);
     }
 
     .description-toggle,
@@ -765,22 +862,11 @@
       overflow: hidden;
       color: var(--text);
       font-size: clamp(1rem, 1.5vw, 1.16rem);
-      font-weight: 720;
-      line-height: 1.42;
+      font-weight: 600;
+      letter-spacing: -0.006em;
+      line-height: 1.38;
       -webkit-box-orient: vertical;
       -webkit-line-clamp: 3;
-    }
-
-    .task-card[data-status="ready"] .description-text {
-      color: var(--ready);
-    }
-
-    .task-card[data-status="blocked"] .description-text {
-      color: var(--blocked);
-    }
-
-    .task-card[data-status="done"] .description-text {
-      color: var(--done);
     }
 
     .description-toggle.expanded .description-text {
@@ -831,8 +917,8 @@
       margin: 0 0 0.35rem;
       color: var(--muted);
       font-size: 0.72rem;
-      font-weight: 850;
-      letter-spacing: 0.06em;
+      font-weight: 750;
+      letter-spacing: 0.045em;
       text-transform: uppercase;
     }
 
@@ -856,6 +942,18 @@
       min-width: 0;
       overflow-wrap: anywhere;
       color: var(--text);
+    }
+
+    .ref-title-status {
+      font-weight: 650;
+    }
+
+    .ref-title-ready {
+      color: var(--ready-text);
+    }
+
+    .ref-title-blocked {
+      color: var(--blocked-text);
     }
 
     .none {
@@ -955,8 +1053,8 @@
     }
 
     .description-text {
-      font-size: 0.97rem;
-      line-height: 1.25;
+      font-size: 1rem;
+      line-height: 1.32;
       -webkit-line-clamp: 2;
     }
 
@@ -975,7 +1073,7 @@
     .ref-priority {
       min-height: 20px;
       padding: 0.08rem 0.38rem;
-      font-size: 0.63rem;
+      font-size: 0.64rem;
     }
 
     .task-details {
@@ -993,8 +1091,8 @@
       overflow: hidden;
       overflow-wrap: anywhere;
       color: var(--text);
-      font-size: 0.82rem;
-      line-height: 1.38;
+      font-size: 0.86rem;
+      line-height: 1.48;
       white-space: normal;
       -webkit-box-orient: vertical;
       -webkit-line-clamp: 3;
@@ -1015,14 +1113,14 @@
 
     .markdown-line-break {
       color: var(--muted);
-      font-weight: 800;
+      font-weight: 700;
     }
 
     .details-rendered {
       display: none;
       color: var(--text);
-      font-size: 0.84rem;
-      line-height: 1.45;
+      font-size: 0.87rem;
+      line-height: 1.52;
     }
 
     .details-toggle.expanded .details-preview {
@@ -1042,8 +1140,10 @@
 
     .markdown-heading {
       margin: 0.3lh 0;
-      color: #4f5965;
-      font-weight: 800;
+      color: #536171;
+      font-size: 0.9em;
+      font-weight: 750;
+      letter-spacing: 0.025em;
       text-transform: uppercase;
     }
 
@@ -1059,7 +1159,7 @@
 
     @media (prefers-color-scheme: dark) {
       .markdown-heading {
-        color: #aeb7c2;
+        color: #b0bac5;
       }
     }
 
@@ -1068,7 +1168,7 @@
       padding: 0.4rem 0.5rem;
       border-radius: 6px;
       background: var(--surface);
-      font-family: ui-monospace, "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-family: var(--font-mono);
       white-space: pre-wrap;
     }
 
@@ -1082,7 +1182,7 @@
       padding: 0.05rem 0.25rem;
       border-radius: 4px;
       background: var(--surface);
-      font-family: ui-monospace, "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-family: var(--font-mono);
     }
 
     .details-empty {
@@ -1122,8 +1222,8 @@
     .relation-inline-label {
       color: var(--muted);
       font-size: 0.64rem;
-      font-weight: 850;
-      letter-spacing: 0.04em;
+      font-weight: 750;
+      letter-spacing: 0.035em;
     }
 
     .relation-separator {
@@ -1133,7 +1233,7 @@
 
     .relationships-compact .task-ref,
     .relationships-compact .ref-title {
-      font-size: 0.75rem;
+      font-size: 0.78rem;
     }
 
     .hover-preview {
@@ -1169,7 +1269,7 @@
 
     .hover-preview-action {
       color: var(--text);
-      font-weight: 800;
+      font-weight: 700;
     }
 
     .empty-state {
@@ -1234,24 +1334,8 @@
         position: static;
       }
 
-      .heading-row {
-        display: grid;
-      }
-
-      .summary {
-        width: 100%;
-      }
-
-      .filter-stack {
-        width: 100%;
-      }
-
-      .controls {
-        grid-template-columns: 1fr 1fr;
-      }
-
-      .search-control {
-        grid-column: 1 / -1;
+      #repository-name {
+        max-width: calc(100vw - 15rem);
       }
 
       .description-text {
@@ -1265,27 +1349,18 @@
         width: min(100% - 1rem, 1380px);
       }
 
-      .summary {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .graph-jump-button {
-        width: 3.2rem;
-        height: 3.2rem;
-      }
-
-      .graph-jump-button svg {
-        width: 2.05rem;
-        height: 2.05rem;
-      }
-
-      .controls,
       .relationships {
         grid-template-columns: 1fr;
       }
 
-      .search-control {
-        grid-column: auto;
+      #repository-name {
+        max-width: calc(100vw - 12rem);
+      }
+
+      .search-control:focus-within,
+      .search-control:has(input:not(:placeholder-shown)) {
+        flex-basis: min(14rem, calc(100vw - 2rem));
+        width: min(14rem, calc(100vw - 2rem));
       }
 
       .navigation-notice {
@@ -1295,6 +1370,11 @@
 
       .task-article {
         padding-inline: 0.75rem;
+      }
+
+      .task-tree-children {
+        --tree-indent: 0.9rem;
+        margin-left: 0.25rem;
       }
 
       .card-topline {
@@ -1323,17 +1403,17 @@
         transition-duration: 0.01ms !important;
       }
 
-      .task-card.navigation-target {
+      .task-card.navigation-target > .task-article {
         animation: none;
         background-color: #FFFF50;
       }
     }
 
     @media (forced-colors: active) {
-      .task-card,
+      .task-article,
       .summary-button[aria-pressed="true"],
       .type-filter-button[aria-pressed="true"],
-      .task-card.navigation-target {
+      .task-card.navigation-target > .task-article {
         border: 2px solid CanvasText;
       }
     }
@@ -1354,7 +1434,8 @@
         box-shadow: none;
       }
 
-      .controls,
+      .search-control,
+      .clear-button,
       .copy-button,
       .navigation-notice,
       .graph-jump-button,
@@ -1367,6 +1448,9 @@
 
       .task-card {
         break-inside: avoid;
+      }
+
+      .task-article {
         box-shadow: none;
       }
 
@@ -1387,66 +1471,42 @@
   <a class="skip-link" href="#task-list">Skip to tasks</a>
   <header class="app-header">
     <div class="header-inner">
-      <div class="heading-row">
-        <div class="heading-primary">
-          <button class="graph-jump-button" id="graph-jump" type="button" aria-controls="graph" aria-label="Jump to dependency graph" title="Jump to dependency graph">
-            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <rect x="9" y="2" width="6" height="4" fill="none" stroke="currentColor" stroke-width="1.7"></rect>
-              <rect x="2" y="17" width="6" height="4" fill="none" stroke="currentColor" stroke-width="1.7"></rect>
-              <rect x="16" y="17" width="6" height="4" fill="none" stroke="currentColor" stroke-width="1.7"></rect>
-              <path d="M12 6v5M5 11h14M5 11v6M19 11v6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path>
-            </svg>
-          </button>
-          <div class="repository-heading">
-            <p class="eyebrow">tat dashboard</p>
-            <h1 id="repository-name">Tasks</h1>
-            <p class="result-count header-result-count" id="result-count" aria-live="polite"></p>
-          </div>
-        </div>
-        <div class="filter-stack">
-          <nav class="summary" aria-label="Filter tasks by status">
-            <button class="summary-button" type="button" data-status-filter="ready" aria-pressed="false">
-              <span class="summary-count" data-count="ready">0</span>
-              <span class="summary-label">Ready</span>
-            </button>
-            <button class="summary-button" type="button" data-status-filter="blocked" aria-pressed="false">
-              <span class="summary-count" data-count="blocked">0</span>
-              <span class="summary-label">Blocked</span>
-            </button>
-            <button class="summary-button" type="button" data-status-filter="recent-done" aria-pressed="false">
-              <span class="summary-count" data-count="recent-done">0</span>
-              <span class="summary-label">Recently done</span>
-            </button>
-            <button class="summary-button" type="button" data-status-filter="old-done" aria-pressed="false">
-              <span class="summary-count" data-count="old-done">0</span>
-              <span class="summary-label">Old done</span>
-            </button>
-          </nav>
-          <nav class="type-summary" aria-label="Filter tasks by type">
-            <button class="type-filter-button" type="button" data-type-filter="BUG" aria-pressed="false">Bug</button>
-            <button class="type-filter-button" type="button" data-type-filter="FEATURE" aria-pressed="false">Feature</button>
-            <button class="type-filter-button" type="button" data-type-filter="TASK" aria-pressed="false">Task</button>
-            <button class="type-filter-button" type="button" data-type-filter="GATE" aria-pressed="false">Gate</button>
-          </nav>
-        </div>
-      </div>
-      <section class="controls" aria-label="Task filters and sorting">
-        <label class="control search-control">
+      <div class="header-toolbar">
+        <button class="graph-jump-button" id="graph-jump" type="button" aria-controls="graph" aria-label="Jump to dependency graph" title="Jump to dependency graph">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <rect x="9" y="2" width="6" height="4" fill="none" stroke="currentColor" stroke-width="1.7"></rect>
+            <rect x="2" y="17" width="6" height="4" fill="none" stroke="currentColor" stroke-width="1.7"></rect>
+            <rect x="16" y="17" width="6" height="4" fill="none" stroke="currentColor" stroke-width="1.7"></rect>
+            <path d="M12 6v5M5 11h14M5 11v6M19 11v6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </button>
+        <p class="eyebrow">tat dashboard</p>
+        <span class="header-separator" aria-hidden="true">|</span>
+        <h1 id="repository-name">Tasks</h1>
+        <span class="header-separator" aria-hidden="true">|</span>
+        <nav class="summary" aria-label="Filter tasks by status">
+          <button class="summary-button" type="button" data-status-filter="ready" aria-pressed="false"><span class="summary-count" data-count="ready">0</span><span class="summary-label">Ready</span></button>
+          <button class="summary-button" type="button" data-status-filter="blocked" aria-pressed="false"><span class="summary-count" data-count="blocked">0</span><span class="summary-label">Blocked</span></button>
+          <button class="summary-button" type="button" data-status-filter="recent-done" aria-pressed="false"><span class="summary-count" data-count="recent-done">0</span><span class="summary-label">Recently done</span></button>
+          <button class="summary-button" type="button" data-status-filter="old-done" aria-pressed="false"><span class="summary-count" data-count="old-done">0</span><span class="summary-label">Old done</span></button>
+        </nav>
+        <nav class="type-summary" aria-label="Filter tasks by type">
+          <button class="type-filter-button" type="button" data-type-filter="BUG" aria-pressed="false">Bug</button>
+          <button class="type-filter-button" type="button" data-type-filter="FEATURE" aria-pressed="false">Feature</button>
+          <button class="type-filter-button" type="button" data-type-filter="TASK" aria-pressed="false">Task</button>
+          <button class="type-filter-button" type="button" data-type-filter="GATE" aria-pressed="false">Gate</button>
+        </nav>
+        <label class="search-control">
           <svg class="control-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2"></circle><path d="m16 16 5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
-          <input id="search" type="search" autocomplete="off" aria-label="Search tasks" placeholder="ID, title, details, type, status, or relationship…">
+          <input id="search" type="search" autocomplete="off" aria-label="Search tasks" placeholder="Search tasks…">
         </label>
-        <label class="control">
-          <svg class="control-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 4v16m0-16L4.5 7.5M8 4l3.5 3.5M16 20V4m0 16-3.5-3.5M16 20l3.5-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-          <select id="sort" aria-label="Sort tasks">
-            <option value="priority-asc">Priority ↑</option>
-            <option value="priority-desc">Priority ↓</option>
-            <option value="id">ID</option>
-            <option value="title">Title</option>
-            <option value="status">Status</option>
-          </select>
-        </label>
-        <button class="clear-button" id="clear-filters" type="button">Reset</button>
-      </section>
+        <button class="clear-button" id="clear-filters" type="button" aria-label="Reset filters" title="Reset filters">
+          <svg class="reset-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </button>
+      </div>
+      <p class="result-count header-result-count" id="result-count" aria-live="polite"></p>
       <aside class="navigation-notice" id="navigation-notice" hidden>
         <div class="navigation-message" id="navigation-message"></div>
         <button class="return-button" id="return-to-results" type="button">Return to filtered results</button>
@@ -1464,10 +1524,6 @@
         <span>Task dependency graph</span>
         <span class="graph-legend">Click a task to focus its card · arrows show BLOCKS, left to right</span>
       </summary>
-      <div class="graph-views" role="group" aria-label="Graph view">
-        <button class="graph-view-button" id="graph-flow-button" type="button" aria-pressed="true" aria-controls="graph-flow">Blocking flow</button>
-        <button class="graph-view-button" id="graph-families-button" type="button" aria-pressed="false" aria-controls="graph-families">Task families</button>
-      </div>
       <div class="graph-key" aria-label="Graph legend">
         <span class="graph-key-item"><span class="graph-key-shape">◆</span>Gate</span>
         <span class="graph-key-item"><span class="graph-key-shape">⬢</span>Bug</span>
@@ -1476,15 +1532,12 @@
         <span class="graph-key-status graph-key-blocked">Blocked</span>
         <span class="graph-key-status graph-key-done">Done</span>
       </div>
-      <div id="graph-flow">
-        <div class="graph-scroll">
-          <div class="task-graph" id="task-graph" role="region" aria-label="Task dependency graph" tabindex="-1">
-            <p class="task-graph-message">Rendering task graph…</p>
-          </div>
+      <div class="graph-scroll">
+        <div class="task-graph" id="task-graph" role="region" aria-label="Task dependency graph" tabindex="-1">
+          <p class="task-graph-message">Rendering task graph…</p>
         </div>
-        <section class="graph-supplement" id="graph-unlinked" hidden></section>
       </div>
-      <div class="graph-families" id="graph-families" role="region" aria-label="Task families" hidden></div>
+      <section class="graph-supplement" id="graph-unlinked" hidden></section>
     </details>
   </main>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -1521,7 +1574,6 @@ __TATVIEWER_MERMAID_LICENSE__
       statuses: new Set(includeOldDone ? allStatusBuckets : defaultStatusBuckets),
       types: new Set(allTaskTypes),
       search: "",
-      sort: "priority-asc",
       forcedId: null
     };
 
@@ -1531,7 +1583,6 @@ __TATVIEWER_MERMAID_LICENSE__
       graphJump: document.getElementById("graph-jump"),
       graphPanel: document.getElementById("graph"),
       search: document.getElementById("search"),
-      sort: document.getElementById("sort"),
       clear: document.getElementById("clear-filters"),
       taskList: document.getElementById("task-list"),
       taskGraph: document.getElementById("task-graph"),
@@ -1546,7 +1597,6 @@ __TATVIEWER_MERMAID_LICENSE__
       hoverPreview: document.getElementById("hover-preview")
     };
 
-    const statusOrder = new Map([["ready", 0], ["blocked", 1], ["recent-done", 2], ["old-done", 3]]);
     let toastTimer = null;
     let hoverTimer = null;
 
@@ -1568,45 +1618,18 @@ __TATVIEWER_MERMAID_LICENSE__
       }
     }
 
-    function graphTaskReference(task, showParent = false) {
+    function graphTaskReference(task) {
       const button = makeElement("button", "graph-task-reference");
       button.type = "button";
       button.dataset.status = task.status;
       button.append(makeElement("strong", "task-graph-id", task.id), document.createTextNode(`: ${task.title}`));
-      const parent = task.relationships.parent;
       const metadata = [task.type, task.status, `p${task.priority_text}`];
-      if (showParent && parent) metadata.push(`Parent ${parent.id}`);
       button.append(makeElement("span", "graph-task-meta", metadata.join(" · ")));
       button.addEventListener("click", () => navigateToTask(task.id, true));
       return button;
     }
 
-    function renderGraphFamilies() {
-      const children = new Map();
-      for (const task of graphTasks) {
-        const parent = task.relationships.parent?.id;
-        const key = graphTaskById.has(parent) ? parent : null;
-        if (!children.has(key)) children.set(key, []);
-        children.get(key).push(task);
-      }
-      const visited = new Set();
-      const branch = (parent) => {
-        const list = makeElement("ul", "graph-family-list");
-        const siblings = (children.get(parent) || []).slice().sort((a, b) => a.priority - b.priority || a.id.localeCompare(b.id));
-        for (const task of siblings) {
-          if (visited.has(task.id)) continue;
-          visited.add(task.id);
-          const item = makeElement("li");
-          item.append(graphTaskReference(task, parent === null));
-          if (children.has(task.id)) item.append(branch(task.id));
-          list.append(item);
-        }
-        return list;
-      };
-      const families = document.getElementById("graph-families");
-      families.replaceChildren(branch(null));
-      if (!graphTasks.length) families.append(makeElement("p", "task-graph-message", "No active, blocked, or recently done tasks to graph."));
-
+    function renderGraphSupplement() {
       const unlinked = graphTasks.filter((task) => !linkedGraphIds.has(task.id));
       const supplement = document.getElementById("graph-unlinked");
       supplement.hidden = !unlinked.length;
@@ -1614,45 +1637,19 @@ __TATVIEWER_MERMAID_LICENSE__
       if (unlinked.length) {
         supplement.append(makeElement("h3", "", `No blocking links in this view · ${unlinked.length} tasks`));
         const list = makeElement("div", "graph-task-list");
-        list.append(...unlinked.map((task) => graphTaskReference(task, true)));
+        list.append(...unlinked.map(graphTaskReference));
         supplement.append(list);
       }
     }
 
-    for (const view of ["flow", "families"]) {
-      document.getElementById(`graph-${view}-button`).addEventListener("click", () => {
-        for (const choice of ["flow", "families"]) {
-          document.getElementById(`graph-${choice}`).hidden = choice !== view;
-          document.getElementById(`graph-${choice}-button`).setAttribute("aria-pressed", String(choice === view));
-        }
-      });
-    }
-
-    function directReferences(task) {
-      const relationships = task.relationships || {};
-      return [
-        ...(relationships.parent ? [relationships.parent] : []),
-        ...(relationships.children || []),
-        ...(relationships.blocks || []),
-        ...(relationships.blocked_by || [])
-      ];
+    function taskSearchText(task) {
+      return [task.id, task.title, task.body_markdown, task.type, task.status, task.priority_text]
+        .join(" ")
+        .toLocaleLowerCase();
     }
 
     for (const task of tasks) {
-      const terms = [task.id, task.title, task.body_markdown, task.type, task.status, task.priority_text];
-      for (const reference of directReferences(task)) {
-        terms.push(reference.id, reference.title, reference.status);
-      }
-      for (const cause of task.blocking_causes || []) {
-        terms.push(
-          cause.kind,
-          cause.blocker.id,
-          cause.blocker.title,
-          cause.blocked_target.id,
-          cause.blocked_target.title
-        );
-      }
-      searchIndex.set(task.id, terms.join(" ").toLocaleLowerCase());
+      searchIndex.set(task.id, taskSearchText(task));
     }
 
     function domId(taskId) {
@@ -1712,7 +1709,7 @@ __TATVIEWER_MERMAID_LICENSE__
     }
 
     async function renderTaskGraph() {
-      renderGraphFamilies();
+      renderGraphSupplement();
       if (!graphTasks.length) {
         elements.taskGraph.replaceChildren(
           makeElement("p", "task-graph-message", "No active, blocked, or recently done tasks to graph.")
@@ -1720,7 +1717,7 @@ __TATVIEWER_MERMAID_LICENSE__
         return;
       }
       if (!linkedGraphIds.size) {
-        elements.taskGraph.replaceChildren(makeElement("p", "task-graph-message", "No blocking links between the included tasks. Use Task families to explore their hierarchy."));
+        elements.taskGraph.replaceChildren(makeElement("p", "task-graph-message", "No blocking links between the included tasks. Their parent-child hierarchy appears in the issue tree above."));
         return;
       }
       try {
@@ -1753,7 +1750,6 @@ __TATVIEWER_MERMAID_LICENSE__
           if (!graphElement) continue;
           boldGraphTaskId(graphElement, task);
           graphElement.classList.add("task-graph-link");
-          if (graphElement.classList.contains("cluster")) graphElement.classList.add("task-graph-family");
           graphElement.setAttribute("role", "link");
           graphElement.setAttribute("tabindex", "0");
           graphElement.setAttribute("aria-label", `Focus ${task.id}: ${task.title}`);
@@ -1811,7 +1807,7 @@ __TATVIEWER_MERMAID_LICENSE__
       const navigable = options.navigable !== false;
       const showTitle = options.showTitle !== false;
       const showStatus = options.showStatus !== false;
-      const showPriority = showStatus && options.showPriority !== false;
+      const showPriority = options.showPriority === true || (showStatus && options.showPriority !== false);
       const idElement = makeElement(navigable ? "a" : "span", navigable ? "task-link" : "task-id", reference.id);
       idElement.dir = "ltr";
       if (navigable) {
@@ -1822,14 +1818,18 @@ __TATVIEWER_MERMAID_LICENSE__
         });
       }
       wrapper.append(idElement, createCopyButton(reference.id));
-      if (showStatus && reference.status) {
+      if (showStatus && reference.status && !(options.hideBlockedStatus && reference.status === "blocked")) {
         wrapper.append(makeElement("span", `ref-status ref-status-${reference.status}`, reference.status));
       }
       if (showPriority && reference.priority_text) {
         wrapper.append(makeElement("span", "ref-priority", `P${reference.priority_text}`));
       }
       if (showTitle) {
-        wrapper.append(makeElement("span", "ref-title", reference.title));
+        const titleClasses = ["ref-title"];
+        if (options.colorTitleByStatus && (reference.status === "ready" || reference.status === "blocked")) {
+          titleClasses.push("ref-title-status", `ref-title-${reference.status}`);
+        }
+        wrapper.append(makeElement("span", titleClasses.join(" "), reference.title));
       }
       const relatedTask = taskById.get(reference.id);
       if (relatedTask && options.showPreview !== false) {
@@ -1842,36 +1842,76 @@ __TATVIEWER_MERMAID_LICENSE__
       return makeElement("span", `badge ${className}`.trim(), text);
     }
 
+    function createCardBadges(task) {
+      const badges = makeElement("div", "badges");
+      if (task.status === "done") {
+        badges.append(createBadge(task.status, `badge-${task.status}`));
+      }
+      badges.append(
+        createBadge(task.type, `badge-type-${task.type.toLowerCase()}`),
+        createBadge(`P${task.priority_text}`)
+      );
+      return badges;
+    }
+
+    function createCardStatusRail(task, compact = false) {
+      if (task.status !== "ready" && task.status !== "blocked") return null;
+      const label = compact ? task.status.charAt(0).toUpperCase() : task.status;
+      const rail = makeElement("span", `card-status-rail card-status-rail-${task.status}`, label);
+      rail.setAttribute("aria-label", `Status: ${task.status}`);
+      return rail;
+    }
+
+    function createRelationshipLabel(label) {
+      if (label === "BLOCKED BY" || label === "BLOCKS") {
+        return createBadge(`${label}:`, "badge-blocked");
+      }
+      return makeElement("span", "relation-inline-label", label);
+    }
+
     function uniqueReferences(references) {
       return [...new Map((references || []).map((reference) => [reference.id, reference])).values()];
     }
 
-    function createCompactRelationships(task) {
+    function createRelationshipSection(groups, ariaLabel, className = "") {
+      groups = groups.filter(([, references]) => references.length > 0);
+      if (groups.length === 0) return null;
+
+      const container = makeElement("section", `relationships-compact ${className}`.trim());
+      container.setAttribute("aria-label", ariaLabel);
+      for (const [label, references] of groups) {
+        const group = makeElement("span", "relation-inline");
+        group.append(createRelationshipLabel(label));
+        const referenceOptions = label === "BLOCKED BY"
+          ? { showStatus: false, showPriority: true, colorTitleByStatus: true }
+          : { hideBlockedStatus: label === "BLOCKS" };
+        references.forEach((reference, index) => {
+          if (index > 0) group.append(makeElement("span", "relation-separator", ","));
+          group.append(createTaskReference(reference, referenceOptions));
+        });
+        container.append(group);
+      }
+      return container;
+    }
+
+    function createBlockedByRelationship(task) {
       const relationships = task.relationships || {};
       const blockedBy = uniqueReferences([
         ...(relationships.blocked_by || []),
         ...(task.blocking_causes || []).map((cause) => cause.blocker)
       ]).filter((reference) => reference.status !== "done");
-      const groups = [
-        ["BLOCKED BY", blockedBy],
-        ["PARENT", relationships.parent ? [relationships.parent] : []],
-        ["BLOCKS", relationships.blocks || []],
-        ["CHILDREN", relationships.children || []]
-      ].filter(([, references]) => references.length > 0);
-      if (groups.length === 0) return null;
+      return createRelationshipSection(
+        [["BLOCKED BY", blockedBy]],
+        "Tasks blocking this task",
+        "blocked-by-relationship"
+      );
+    }
 
-      const container = makeElement("section", "relationships-compact");
-      container.setAttribute("aria-label", "Task relationships");
-      for (const [label, references] of groups) {
-        const group = makeElement("span", "relation-inline");
-        group.append(makeElement("span", "relation-inline-label", label));
-        references.forEach((reference, index) => {
-          if (index > 0) group.append(makeElement("span", "relation-separator", ","));
-          group.append(createTaskReference(reference));
-        });
-        container.append(group);
-      }
-      return container;
+    function createCompactRelationships(task) {
+      const relationships = task.relationships || {};
+      return createRelationshipSection([
+        ["BLOCKS", relationships.blocks || []]
+      ], "Task relationships");
     }
 
     function createDescription(task) {
@@ -2137,14 +2177,18 @@ __TATVIEWER_MERMAID_LICENSE__
       return section;
     }
 
-    function createTaskCard(task) {
-      const listItem = makeElement("li", "task-card");
+    function createTaskCard(task, contextOnly = false) {
+      const listItem = makeElement("li", contextOnly ? "task-card task-card-context" : "task-card");
       listItem.dataset.status = task.status;
       listItem.dataset.taskId = task.id;
+      if (contextOnly) listItem.dataset.context = "ancestor";
       const article = makeElement("article", "task-article");
       article.id = domId(task.id);
       article.dataset.taskId = task.id;
       article.tabIndex = -1;
+
+      const statusRail = createCardStatusRail(task, contextOnly);
+      if (statusRail) article.append(statusRail);
 
       const topLine = makeElement("div", "card-topline");
       const idRow = makeElement("div", "card-id-row");
@@ -2154,16 +2198,17 @@ __TATVIEWER_MERMAID_LICENSE__
         showStatus: false,
         showPreview: false
       }));
-      const badges = makeElement("div", "badges");
-      badges.append(
-        createBadge(task.status, `badge-${task.status}`),
-        createBadge(task.type),
-        createBadge(`P${task.priority_text}`)
-      );
+      const badges = createCardBadges(task);
       const headline = makeElement("div", "card-headline");
       headline.append(createDescription(task), badges);
       topLine.append(idRow, headline);
       article.append(topLine);
+      if (contextOnly) {
+        listItem.append(article);
+        return listItem;
+      }
+      const blockedByRelationship = createBlockedByRelationship(task);
+      if (blockedByRelationship) article.append(blockedByRelationship);
       const details = createDetails(task);
       if (details) article.append(details);
       const compactRelationships = createCompactRelationships(task);
@@ -2172,26 +2217,80 @@ __TATVIEWER_MERMAID_LICENSE__
       return listItem;
     }
 
+    function createTreeParentLink(parentTask) {
+      const link = makeElement("a", "task-tree-parent-link");
+      link.href = `#${domId(parentTask.id)}`;
+      link.title = `Go to parent ${parentTask.id}: ${parentTask.title}`;
+      link.setAttribute("aria-label", link.title);
+      link.addEventListener("click", (event) => {
+        event.preventDefault();
+        navigateToTask(parentTask.id, true);
+      });
+      return link;
+    }
+
+    function createTreeView(matchingTasks) {
+      const matchingIds = new Set(matchingTasks.map((task) => task.id));
+      const visibleIds = new Set(matchingIds);
+      const contextIds = new Set();
+
+      for (const task of matchingTasks) {
+        const seen = new Set([task.id]);
+        let parentId = task.relationships?.parent?.id;
+        while (parentId && !seen.has(parentId)) {
+          seen.add(parentId);
+          const parent = taskById.get(parentId);
+          if (!parent) break;
+          visibleIds.add(parentId);
+          if (!matchingIds.has(parentId)) contextIds.add(parentId);
+          parentId = parent.relationships?.parent?.id;
+        }
+      }
+
+      return {
+        visibleTasks: tasks.filter((task) => visibleIds.has(task.id)),
+        contextIds
+      };
+    }
+
+    function createTaskTreeItems(visibleTasks, contextIds = new Set()) {
+      const visibleById = new Map(visibleTasks.map((task) => [task.id, task]));
+      const childrenByParent = new Map();
+      for (const task of visibleTasks) {
+        const parentId = task.relationships?.parent?.id;
+        const key = parentId !== task.id && visibleById.has(parentId) ? parentId : null;
+        if (!childrenByParent.has(key)) childrenByParent.set(key, []);
+        childrenByParent.get(key).push(task);
+      }
+
+      const visited = new Set();
+      const createBranchItem = (task, parentTask = null) => {
+        visited.add(task.id);
+        const item = createTaskCard(task, contextIds.has(task.id));
+        if (parentTask) item.append(createTreeParentLink(parentTask));
+        const children = (childrenByParent.get(task.id) || []).filter((child) => !visited.has(child.id));
+        if (children.length) {
+          const list = makeElement("ul", "task-tree-children");
+          list.append(...children.map((child) => createBranchItem(child, task)));
+          item.append(list);
+        }
+        return item;
+      };
+
+      const roots = childrenByParent.get(null) || [];
+      const items = roots.map((task) => createBranchItem(task));
+      const remaining = visibleTasks;
+      for (const task of remaining) {
+        if (!visited.has(task.id)) items.push(createBranchItem(task));
+      }
+      return items;
+    }
+
     function matchesFilters(task) {
       if (!state.statuses.has(taskStatusBucket(task))) return false;
       if (!state.types.has(task.type)) return false;
       const query = state.search.trim().toLocaleLowerCase();
       return !query || searchIndex.get(task.id).includes(query);
-    }
-
-    function compareTasks(left, right) {
-      switch (state.sort) {
-        case "priority-desc":
-          return right.priority - left.priority || left.id.localeCompare(right.id);
-        case "id":
-          return left.id.localeCompare(right.id);
-        case "title":
-          return left.title.localeCompare(right.title) || left.id.localeCompare(right.id);
-        case "status":
-          return (statusOrder.get(taskStatusBucket(left)) - statusOrder.get(taskStatusBucket(right))) || left.id.localeCompare(right.id);
-        default:
-          return left.priority - right.priority || left.id.localeCompare(right.id);
-      }
     }
 
     function updateSummary() {
@@ -2250,15 +2349,17 @@ __TATVIEWER_MERMAID_LICENSE__
 
     function render() {
       const base = tasks.filter(matchesFilters);
-      const visible = [...base];
       const forcedTask = state.forcedId ? taskById.get(state.forcedId) : null;
-      const forcedOutside = Boolean(forcedTask && !visible.some((task) => task.id === forcedTask.id));
-      if (forcedOutside) visible.push(forcedTask);
-      visible.sort(compareTasks);
-      elements.taskList.replaceChildren(...visible.map(createTaskCard));
-      elements.resultCount.textContent = forcedOutside
-        ? `${base.length} matching task${base.length === 1 ? "" : "s"} plus 1 navigation target — ${tasks.length} total`
-        : `${visible.length} of ${tasks.length} task${tasks.length === 1 ? "" : "s"} shown`;
+      const forcedOutside = Boolean(forcedTask && !base.some((task) => task.id === forcedTask.id));
+      const selectedTasks = forcedOutside ? [...base, forcedTask] : base;
+      const { visibleTasks, contextIds } = createTreeView(selectedTasks);
+      elements.taskList.replaceChildren(...createTaskTreeItems(visibleTasks, contextIds));
+      const resultParts = [`${base.length} matching task${base.length === 1 ? "" : "s"}`];
+      if (contextIds.size) {
+        resultParts.push(`${contextIds.size} ancestor${contextIds.size === 1 ? "" : "s"} shown for context`);
+      }
+      if (forcedOutside) resultParts.push("1 navigation target");
+      elements.resultCount.textContent = `${resultParts.join(", ")} — ${tasks.length} total`;
       updateSummary();
       updateEmptyState(base.length);
       updateNavigationNotice(forcedOutside);
@@ -2276,7 +2377,7 @@ __TATVIEWER_MERMAID_LICENSE__
         window.setTimeout(() => {
           const wrapper = card.closest(".task-card");
           if (wrapper) wrapper.classList.remove("navigation-target");
-        }, 4800);
+        }, 2880);
       });
     }
 
@@ -2352,9 +2453,7 @@ __TATVIEWER_MERMAID_LICENSE__
       state.statuses = new Set(includeOldDone ? allStatusBuckets : defaultStatusBuckets);
       state.types = new Set(allTaskTypes);
       state.search = "";
-      state.sort = "priority-asc";
       elements.search.value = "";
-      elements.sort.value = "priority-asc";
       render();
     }
 
@@ -2381,11 +2480,6 @@ __TATVIEWER_MERMAID_LICENSE__
     elements.search.addEventListener("input", () => {
       clearForcedNavigation();
       state.search = elements.search.value;
-      render();
-    });
-
-    elements.sort.addEventListener("change", () => {
-      state.sort = elements.sort.value;
       render();
     });
 

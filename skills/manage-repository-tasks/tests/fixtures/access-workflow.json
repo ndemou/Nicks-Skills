@@ -5,7 +5,7 @@
   "tasks": [
     {
       "id": "t@q3b3",
-      "title": "Publish the three validated local commits to origin main",
+      "title": "Publish validated local commits to the shared branch",
       "body_markdown": "",
       "created_at": "2026-09-19T09:50:29.964Z",
       "completed_at": null,
@@ -16,11 +16,11 @@
       "priority_text": "0",
       "type": "TASK",
       "status": "ready",
-      "filename": "t@q3b3, parent-t@m46p, p0, TASK, Publish the three validated local commits to origin main.md",
+      "filename": "t@q3b3, parent-t@m46p, p0, TASK, Publish validated local commits to the shared branch.md",
       "relationships": {
         "parent": {
           "id": "t@m46p",
-          "title": "Automate the Access application development workflow",
+          "title": "Automate the Access development workflow",
           "status": "ready",
           "priority_text": "9"
         },
@@ -32,7 +32,7 @@
     },
     {
       "id": "t@rtio",
-      "title": "Make Access object import recoverable on LoadFromText failure",
+      "title": "Restore the original object when an Access import fails",
       "body_markdown": "",
       "created_at": "2026-09-19T09:50:28.857Z",
       "completed_at": null,
@@ -43,11 +43,11 @@
       "priority_text": "0",
       "type": "BUG",
       "status": "ready",
-      "filename": "t@rtio, parent-t@goz4, blocks-t@u5rj, p0, BUG, Make Access object import recoverable on LoadFromText failure.md",
+      "filename": "t@rtio, parent-t@goz4, blocks-t@u5rj, p0, BUG, Restore the original object when an Access import fails.md",
       "relationships": {
         "parent": {
           "id": "t@goz4",
-          "title": "Harden Access source export and import",
+          "title": "Make Access source export and import reliable",
           "status": "ready",
           "priority_text": "8"
         },
@@ -55,7 +55,7 @@
         "blocks": [
           {
             "id": "t@u5rj",
-            "title": "Implement Build-AccessCandidate",
+            "title": "Build a disposable Access database candidate",
             "status": "blocked",
             "priority_text": "2"
           }
@@ -66,7 +66,7 @@
     },
     {
       "id": "t@um1a",
-      "title": "Make Access export reject partial snapshots",
+      "title": "Reject incomplete Access source exports",
       "body_markdown": "",
       "created_at": "2026-09-19T09:50:28.929Z",
       "completed_at": null,
@@ -77,11 +77,11 @@
       "priority_text": "0",
       "type": "BUG",
       "status": "ready",
-      "filename": "t@um1a, parent-t@goz4, blocks-t@4ms7, p0, BUG, Make Access export reject partial snapshots.md",
+      "filename": "t@um1a, parent-t@goz4, blocks-t@4ms7, p0, BUG, Reject incomplete Access source exports.md",
       "relationships": {
         "parent": {
           "id": "t@goz4",
-          "title": "Harden Access source export and import",
+          "title": "Make Access source export and import reliable",
           "status": "ready",
           "priority_text": "8"
         },
@@ -89,7 +89,7 @@
         "blocks": [
           {
             "id": "t@4ms7",
-            "title": "Implement Export-AccessSource",
+            "title": "Export Access source safely",
             "status": "blocked",
             "priority_text": "1"
           }
@@ -100,7 +100,7 @@
     },
     {
       "id": "t@2cio",
-      "title": "Document the interim Git snapshot plus baseline ACCDB workflow",
+      "title": "Document the temporary baseline database workflow",
       "body_markdown": "",
       "created_at": "2026-09-19T09:50:29.894Z",
       "completed_at": null,
@@ -111,11 +111,11 @@
       "priority_text": "1",
       "type": "TASK",
       "status": "ready",
-      "filename": "t@2cio, parent-t@m46p, p1, TASK, Document the interim Git snapshot plus baseline ACCDB workflow.md",
+      "filename": "t@2cio, parent-t@m46p, p1, TASK, Document the temporary baseline database workflow.md",
       "relationships": {
         "parent": {
           "id": "t@m46p",
-          "title": "Automate the Access application development workflow",
+          "title": "Automate the Access development workflow",
           "status": "ready",
           "priority_text": "9"
         },
@@ -127,7 +127,7 @@
     },
     {
       "id": "t@4ms7",
-      "title": "Implement Export-AccessSource",
+      "title": "Export Access source safely",
       "body_markdown": "",
       "created_at": "2026-09-19T09:50:29.519Z",
       "completed_at": null,
@@ -138,11 +138,11 @@
       "priority_text": "1",
       "type": "FEATURE",
       "status": "blocked",
-      "filename": "t@4ms7, parent-t@ypov, blocks-t@t1op, p1, FEATURE, Implement Export-AccessSource.md",
+      "filename": "t@4ms7, parent-t@ypov, blocks-t@t1op, p1, FEATURE, Export Access source safely.md",
       "relationships": {
         "parent": {
           "id": "t@ypov",
-          "title": "Build the Access development automation command suite",
+          "title": "Create one command suite for the Access workflow",
           "status": "ready",
           "priority_text": "8"
         },
@@ -150,7 +150,7 @@
         "blocks": [
           {
             "id": "t@t1op",
-            "title": "Implement Test-AccessCandidate",
+            "title": "Test an Access build candidate",
             "status": "blocked",
             "priority_text": "2"
           }
@@ -158,13 +158,13 @@
         "blocked_by": [
           {
             "id": "t@63nk",
-            "title": "Create a unified Access snapshot and build manifest",
+            "title": "Create one manifest for Access source and builds",
             "status": "ready",
             "priority_text": "1"
           },
           {
             "id": "t@um1a",
-            "title": "Make Access export reject partial snapshots",
+            "title": "Reject incomplete Access source exports",
             "status": "ready",
             "priority_text": "0"
           }
@@ -174,13 +174,13 @@
         {
           "blocker": {
             "id": "t@63nk",
-            "title": "Create a unified Access snapshot and build manifest",
+            "title": "Create one manifest for Access source and builds",
             "status": "ready",
             "priority_text": "1"
           },
           "blocked_target": {
             "id": "t@4ms7",
-            "title": "Implement Export-AccessSource",
+            "title": "Export Access source safely",
             "status": "blocked",
             "priority_text": "1"
           },
@@ -189,13 +189,13 @@
         {
           "blocker": {
             "id": "t@um1a",
-            "title": "Make Access export reject partial snapshots",
+            "title": "Reject incomplete Access source exports",
             "status": "ready",
             "priority_text": "0"
           },
           "blocked_target": {
             "id": "t@4ms7",
-            "title": "Implement Export-AccessSource",
+            "title": "Export Access source safely",
             "status": "blocked",
             "priority_text": "1"
           },
@@ -205,7 +205,7 @@
     },
     {
       "id": "t@63nk",
-      "title": "Create a unified Access snapshot and build manifest",
+      "title": "Create one manifest for Access source and builds",
       "body_markdown": "",
       "created_at": "2026-09-19T09:50:29.252Z",
       "completed_at": null,
@@ -216,11 +216,11 @@
       "priority_text": "1",
       "type": "FEATURE",
       "status": "ready",
-      "filename": "t@63nk, parent-t@goz4, blocks-t@4ms7-t@edrm-t@u5rj, p1, FEATURE, Create a unified Access snapshot and build manifest.md",
+      "filename": "t@63nk, parent-t@goz4, blocks-t@4ms7-t@edrm-t@u5rj, p1, FEATURE, Create one manifest for Access source and builds.md",
       "relationships": {
         "parent": {
           "id": "t@goz4",
-          "title": "Harden Access source export and import",
+          "title": "Make Access source export and import reliable",
           "status": "ready",
           "priority_text": "8"
         },
@@ -228,19 +228,19 @@
         "blocks": [
           {
             "id": "t@4ms7",
-            "title": "Implement Export-AccessSource",
+            "title": "Export Access source safely",
             "status": "blocked",
             "priority_text": "1"
           },
           {
             "id": "t@edrm",
-            "title": "Implement Package-AccessTransfer",
+            "title": "Package an Access build for transfer",
             "status": "blocked",
             "priority_text": "2"
           },
           {
             "id": "t@u5rj",
-            "title": "Implement Build-AccessCandidate",
+            "title": "Build a disposable Access database candidate",
             "status": "blocked",
             "priority_text": "2"
           }
@@ -251,7 +251,7 @@
     },
     {
       "id": "t@9jpt",
-      "title": "Define the W drive Access artifact exchange protocol",
+      "title": "Define how computers exchange Access build packages",
       "body_markdown": "",
       "created_at": "2026-09-19T09:50:29.815Z",
       "completed_at": null,
@@ -262,11 +262,11 @@
       "priority_text": "1",
       "type": "TASK",
       "status": "ready",
-      "filename": "t@9jpt, parent-t@m46p, blocks-t@edrm, p1, TASK, Define the W drive Access artifact exchange protocol.md",
+      "filename": "t@9jpt, parent-t@m46p, blocks-t@edrm, p1, TASK, Define how computers exchange Access build packages.md",
       "relationships": {
         "parent": {
           "id": "t@m46p",
-          "title": "Automate the Access application development workflow",
+          "title": "Automate the Access development workflow",
           "status": "ready",
           "priority_text": "9"
         },
@@ -274,7 +274,7 @@
         "blocks": [
           {
             "id": "t@edrm",
-            "title": "Implement Package-AccessTransfer",
+            "title": "Package an Access build for transfer",
             "status": "blocked",
             "priority_text": "2"
           }
@@ -285,7 +285,7 @@
     },
     {
       "id": "t@pyph",
-      "title": "Keep Access database binaries and lock files out of Git",
+      "title": "Exclude Access database and lock files from Git",
       "body_markdown": "",
       "created_at": "2026-09-19T09:50:29.338Z",
       "completed_at": null,
@@ -296,11 +296,11 @@
       "priority_text": "1",
       "type": "TASK",
       "status": "ready",
-      "filename": "t@pyph, parent-t@goz4, p1, TASK, Keep Access database binaries and lock files out of Git.md",
+      "filename": "t@pyph, parent-t@goz4, p1, TASK, Exclude Access database and lock files from Git.md",
       "relationships": {
         "parent": {
           "id": "t@goz4",
-          "title": "Harden Access source export and import",
+          "title": "Make Access source export and import reliable",
           "status": "ready",
           "priority_text": "8"
         },
@@ -312,7 +312,7 @@
     },
     {
       "id": "t@schs",
-      "title": "Track Access schema changes as idempotent DAO migrations",
+      "title": "Apply Access schema changes with repeatable migrations",
       "body_markdown": "",
       "created_at": "2026-09-19T09:50:29.173Z",
       "completed_at": null,
@@ -323,11 +323,11 @@
       "priority_text": "1",
       "type": "FEATURE",
       "status": "ready",
-      "filename": "t@schs, parent-t@goz4, blocks-t@u5rj, p1, FEATURE, Track Access schema changes as idempotent DAO migrations.md",
+      "filename": "t@schs, parent-t@goz4, blocks-t@u5rj, p1, FEATURE, Apply Access schema changes with repeatable migrations.md",
       "relationships": {
         "parent": {
           "id": "t@goz4",
-          "title": "Harden Access source export and import",
+          "title": "Make Access source export and import reliable",
           "status": "ready",
           "priority_text": "8"
         },
@@ -335,7 +335,7 @@
         "blocks": [
           {
             "id": "t@u5rj",
-            "title": "Implement Build-AccessCandidate",
+            "title": "Build a disposable Access database candidate",
             "status": "blocked",
             "priority_text": "2"
           }
@@ -346,7 +346,7 @@
     },
     {
       "id": "t@svvn",
-      "title": "Define reproducible TableDef handling for Access builds",
+      "title": "Reproduce Access table definitions during builds",
       "body_markdown": "",
       "created_at": "2026-09-19T09:50:29.096Z",
       "completed_at": null,
@@ -357,11 +357,11 @@
       "priority_text": "1",
       "type": "FEATURE",
       "status": "ready",
-      "filename": "t@svvn, parent-t@goz4, blocks-t@u5rj, p1, FEATURE, Define reproducible TableDef handling for Access builds.md",
+      "filename": "t@svvn, parent-t@goz4, blocks-t@u5rj, p1, FEATURE, Reproduce Access table definitions during builds.md",
       "relationships": {
         "parent": {
           "id": "t@goz4",
-          "title": "Harden Access source export and import",
+          "title": "Make Access source export and import reliable",
           "status": "ready",
           "priority_text": "8"
         },
@@ -369,7 +369,7 @@
         "blocks": [
           {
             "id": "t@u5rj",
-            "title": "Implement Build-AccessCandidate",
+            "title": "Build a disposable Access database candidate",
             "status": "blocked",
             "priority_text": "2"
           }
@@ -380,7 +380,7 @@
     },
     {
       "id": "t@die0",
-      "title": "Version the Access export comparison tool in the repository",
+      "title": "Move the Access export comparison tool into the repository",
       "body_markdown": "",
       "created_at": "2026-09-19T09:50:29.021Z",
       "completed_at": null,
@@ -391,11 +391,11 @@
       "priority_text": "2",
       "type": "TASK",
       "status": "ready",
-      "filename": "t@die0, parent-t@goz4, blocks-t@t1op, p2, TASK, Version the Access export comparison tool in the repository.md",
+      "filename": "t@die0, parent-t@goz4, blocks-t@t1op, p2, TASK, Move the Access export comparison tool into the repository.md",
       "relationships": {
         "parent": {
           "id": "t@goz4",
-          "title": "Harden Access source export and import",
+          "title": "Make Access source export and import reliable",
           "status": "ready",
           "priority_text": "8"
         },
@@ -403,7 +403,7 @@
         "blocks": [
           {
             "id": "t@t1op",
-            "title": "Implement Test-AccessCandidate",
+            "title": "Test an Access build candidate",
             "status": "blocked",
             "priority_text": "2"
           }
@@ -414,7 +414,7 @@
     },
     {
       "id": "t@edrm",
-      "title": "Implement Package-AccessTransfer",
+      "title": "Package an Access build for transfer",
       "body_markdown": "",
       "created_at": "2026-09-19T09:50:29.748Z",
       "completed_at": null,
@@ -425,11 +425,11 @@
       "priority_text": "2",
       "type": "FEATURE",
       "status": "blocked",
-      "filename": "t@edrm, parent-t@ypov, p2, FEATURE, Implement Package-AccessTransfer.md",
+      "filename": "t@edrm, parent-t@ypov, p2, FEATURE, Package an Access build for transfer.md",
       "relationships": {
         "parent": {
           "id": "t@ypov",
-          "title": "Build the Access development automation command suite",
+          "title": "Create one command suite for the Access workflow",
           "status": "ready",
           "priority_text": "8"
         },
@@ -438,19 +438,19 @@
         "blocked_by": [
           {
             "id": "t@63nk",
-            "title": "Create a unified Access snapshot and build manifest",
+            "title": "Create one manifest for Access source and builds",
             "status": "ready",
             "priority_text": "1"
           },
           {
             "id": "t@9jpt",
-            "title": "Define the W drive Access artifact exchange protocol",
+            "title": "Define how computers exchange Access build packages",
             "status": "ready",
             "priority_text": "1"
           },
           {
             "id": "t@t1op",
-            "title": "Implement Test-AccessCandidate",
+            "title": "Test an Access build candidate",
             "status": "blocked",
             "priority_text": "2"
           }
@@ -460,13 +460,13 @@
         {
           "blocker": {
             "id": "t@63nk",
-            "title": "Create a unified Access snapshot and build manifest",
+            "title": "Create one manifest for Access source and builds",
             "status": "ready",
             "priority_text": "1"
           },
           "blocked_target": {
             "id": "t@edrm",
-            "title": "Implement Package-AccessTransfer",
+            "title": "Package an Access build for transfer",
             "status": "blocked",
             "priority_text": "2"
           },
@@ -475,13 +475,13 @@
         {
           "blocker": {
             "id": "t@9jpt",
-            "title": "Define the W drive Access artifact exchange protocol",
+            "title": "Define how computers exchange Access build packages",
             "status": "ready",
             "priority_text": "1"
           },
           "blocked_target": {
             "id": "t@edrm",
-            "title": "Implement Package-AccessTransfer",
+            "title": "Package an Access build for transfer",
             "status": "blocked",
             "priority_text": "2"
           },
@@ -490,13 +490,13 @@
         {
           "blocker": {
             "id": "t@t1op",
-            "title": "Implement Test-AccessCandidate",
+            "title": "Test an Access build candidate",
             "status": "blocked",
             "priority_text": "2"
           },
           "blocked_target": {
             "id": "t@edrm",
-            "title": "Implement Package-AccessTransfer",
+            "title": "Package an Access build for transfer",
             "status": "blocked",
             "priority_text": "2"
           },
@@ -506,7 +506,7 @@
     },
     {
       "id": "t@t1op",
-      "title": "Implement Test-AccessCandidate",
+      "title": "Test an Access build candidate",
       "body_markdown": "",
       "created_at": "2026-09-19T09:50:29.673Z",
       "completed_at": null,
@@ -517,11 +517,11 @@
       "priority_text": "2",
       "type": "FEATURE",
       "status": "blocked",
-      "filename": "t@t1op, parent-t@ypov, blocks-t@edrm, p2, FEATURE, Implement Test-AccessCandidate.md",
+      "filename": "t@t1op, parent-t@ypov, blocks-t@edrm, p2, FEATURE, Test an Access build candidate.md",
       "relationships": {
         "parent": {
           "id": "t@ypov",
-          "title": "Build the Access development automation command suite",
+          "title": "Create one command suite for the Access workflow",
           "status": "ready",
           "priority_text": "8"
         },
@@ -529,7 +529,7 @@
         "blocks": [
           {
             "id": "t@edrm",
-            "title": "Implement Package-AccessTransfer",
+            "title": "Package an Access build for transfer",
             "status": "blocked",
             "priority_text": "2"
           }
@@ -537,19 +537,19 @@
         "blocked_by": [
           {
             "id": "t@4ms7",
-            "title": "Implement Export-AccessSource",
+            "title": "Export Access source safely",
             "status": "blocked",
             "priority_text": "1"
           },
           {
             "id": "t@die0",
-            "title": "Version the Access export comparison tool in the repository",
+            "title": "Move the Access export comparison tool into the repository",
             "status": "ready",
             "priority_text": "2"
           },
           {
             "id": "t@u5rj",
-            "title": "Implement Build-AccessCandidate",
+            "title": "Build a disposable Access database candidate",
             "status": "blocked",
             "priority_text": "2"
           }
@@ -559,13 +559,13 @@
         {
           "blocker": {
             "id": "t@4ms7",
-            "title": "Implement Export-AccessSource",
+            "title": "Export Access source safely",
             "status": "blocked",
             "priority_text": "1"
           },
           "blocked_target": {
             "id": "t@t1op",
-            "title": "Implement Test-AccessCandidate",
+            "title": "Test an Access build candidate",
             "status": "blocked",
             "priority_text": "2"
           },
@@ -574,13 +574,13 @@
         {
           "blocker": {
             "id": "t@die0",
-            "title": "Version the Access export comparison tool in the repository",
+            "title": "Move the Access export comparison tool into the repository",
             "status": "ready",
             "priority_text": "2"
           },
           "blocked_target": {
             "id": "t@t1op",
-            "title": "Implement Test-AccessCandidate",
+            "title": "Test an Access build candidate",
             "status": "blocked",
             "priority_text": "2"
           },
@@ -589,13 +589,13 @@
         {
           "blocker": {
             "id": "t@u5rj",
-            "title": "Implement Build-AccessCandidate",
+            "title": "Build a disposable Access database candidate",
             "status": "blocked",
             "priority_text": "2"
           },
           "blocked_target": {
             "id": "t@t1op",
-            "title": "Implement Test-AccessCandidate",
+            "title": "Test an Access build candidate",
             "status": "blocked",
             "priority_text": "2"
           },
@@ -605,7 +605,7 @@
     },
     {
       "id": "t@u5rj",
-      "title": "Implement Build-AccessCandidate",
+      "title": "Build a disposable Access database candidate",
       "body_markdown": "",
       "created_at": "2026-09-19T09:50:29.593Z",
       "completed_at": null,
@@ -616,11 +616,11 @@
       "priority_text": "2",
       "type": "FEATURE",
       "status": "blocked",
-      "filename": "t@u5rj, parent-t@ypov, blocks-t@t1op, p2, FEATURE, Implement Build-AccessCandidate.md",
+      "filename": "t@u5rj, parent-t@ypov, blocks-t@t1op, p2, FEATURE, Build a disposable Access database candidate.md",
       "relationships": {
         "parent": {
           "id": "t@ypov",
-          "title": "Build the Access development automation command suite",
+          "title": "Create one command suite for the Access workflow",
           "status": "ready",
           "priority_text": "8"
         },
@@ -628,7 +628,7 @@
         "blocks": [
           {
             "id": "t@t1op",
-            "title": "Implement Test-AccessCandidate",
+            "title": "Test an Access build candidate",
             "status": "blocked",
             "priority_text": "2"
           }
@@ -636,25 +636,25 @@
         "blocked_by": [
           {
             "id": "t@63nk",
-            "title": "Create a unified Access snapshot and build manifest",
+            "title": "Create one manifest for Access source and builds",
             "status": "ready",
             "priority_text": "1"
           },
           {
             "id": "t@rtio",
-            "title": "Make Access object import recoverable on LoadFromText failure",
+            "title": "Restore the original object when an Access import fails",
             "status": "ready",
             "priority_text": "0"
           },
           {
             "id": "t@schs",
-            "title": "Track Access schema changes as idempotent DAO migrations",
+            "title": "Apply Access schema changes with repeatable migrations",
             "status": "ready",
             "priority_text": "1"
           },
           {
             "id": "t@svvn",
-            "title": "Define reproducible TableDef handling for Access builds",
+            "title": "Reproduce Access table definitions during builds",
             "status": "ready",
             "priority_text": "1"
           }
@@ -664,13 +664,13 @@
         {
           "blocker": {
             "id": "t@63nk",
-            "title": "Create a unified Access snapshot and build manifest",
+            "title": "Create one manifest for Access source and builds",
             "status": "ready",
             "priority_text": "1"
           },
           "blocked_target": {
             "id": "t@u5rj",
-            "title": "Implement Build-AccessCandidate",
+            "title": "Build a disposable Access database candidate",
             "status": "blocked",
             "priority_text": "2"
           },
@@ -679,13 +679,13 @@
         {
           "blocker": {
             "id": "t@rtio",
-            "title": "Make Access object import recoverable on LoadFromText failure",
+            "title": "Restore the original object when an Access import fails",
             "status": "ready",
             "priority_text": "0"
           },
           "blocked_target": {
             "id": "t@u5rj",
-            "title": "Implement Build-AccessCandidate",
+            "title": "Build a disposable Access database candidate",
             "status": "blocked",
             "priority_text": "2"
           },
@@ -694,13 +694,13 @@
         {
           "blocker": {
             "id": "t@schs",
-            "title": "Track Access schema changes as idempotent DAO migrations",
+            "title": "Apply Access schema changes with repeatable migrations",
             "status": "ready",
             "priority_text": "1"
           },
           "blocked_target": {
             "id": "t@u5rj",
-            "title": "Implement Build-AccessCandidate",
+            "title": "Build a disposable Access database candidate",
             "status": "blocked",
             "priority_text": "2"
           },
@@ -709,13 +709,13 @@
         {
           "blocker": {
             "id": "t@svvn",
-            "title": "Define reproducible TableDef handling for Access builds",
+            "title": "Reproduce Access table definitions during builds",
             "status": "ready",
             "priority_text": "1"
           },
           "blocked_target": {
             "id": "t@u5rj",
-            "title": "Implement Build-AccessCandidate",
+            "title": "Build a disposable Access database candidate",
             "status": "blocked",
             "priority_text": "2"
           },
@@ -725,7 +725,7 @@
     },
     {
       "id": "t@goz4",
-      "title": "Harden Access source export and import",
+      "title": "Make Access source export and import reliable",
       "body_markdown": "",
       "created_at": "2026-09-19T09:50:28.790Z",
       "completed_at": null,
@@ -736,54 +736,54 @@
       "priority_text": "8",
       "type": "TASK",
       "status": "ready",
-      "filename": "t@goz4, parent-t@m46p, p8, TASK, Harden Access source export and import.md",
+      "filename": "t@goz4, parent-t@m46p, p8, TASK, Make Access source export and import reliable.md",
       "relationships": {
         "parent": {
           "id": "t@m46p",
-          "title": "Automate the Access application development workflow",
+          "title": "Automate the Access development workflow",
           "status": "ready",
           "priority_text": "9"
         },
         "children": [
           {
             "id": "t@63nk",
-            "title": "Create a unified Access snapshot and build manifest",
+            "title": "Create one manifest for Access source and builds",
             "status": "ready",
             "priority_text": "1"
           },
           {
             "id": "t@die0",
-            "title": "Version the Access export comparison tool in the repository",
+            "title": "Move the Access export comparison tool into the repository",
             "status": "ready",
             "priority_text": "2"
           },
           {
             "id": "t@pyph",
-            "title": "Keep Access database binaries and lock files out of Git",
+            "title": "Exclude Access database and lock files from Git",
             "status": "ready",
             "priority_text": "1"
           },
           {
             "id": "t@rtio",
-            "title": "Make Access object import recoverable on LoadFromText failure",
+            "title": "Restore the original object when an Access import fails",
             "status": "ready",
             "priority_text": "0"
           },
           {
             "id": "t@schs",
-            "title": "Track Access schema changes as idempotent DAO migrations",
+            "title": "Apply Access schema changes with repeatable migrations",
             "status": "ready",
             "priority_text": "1"
           },
           {
             "id": "t@svvn",
-            "title": "Define reproducible TableDef handling for Access builds",
+            "title": "Reproduce Access table definitions during builds",
             "status": "ready",
             "priority_text": "1"
           },
           {
             "id": "t@um1a",
-            "title": "Make Access export reject partial snapshots",
+            "title": "Reject incomplete Access source exports",
             "status": "ready",
             "priority_text": "0"
           }
@@ -795,7 +795,7 @@
     },
     {
       "id": "t@ypov",
-      "title": "Build the Access development automation command suite",
+      "title": "Create one command suite for the Access workflow",
       "body_markdown": "",
       "created_at": "2026-09-19T09:50:29.414Z",
       "completed_at": null,
@@ -806,36 +806,36 @@
       "priority_text": "8",
       "type": "FEATURE",
       "status": "ready",
-      "filename": "t@ypov, parent-t@m46p, p8, FEATURE, Build the Access development automation command suite.md",
+      "filename": "t@ypov, parent-t@m46p, p8, FEATURE, Create one command suite for the Access workflow.md",
       "relationships": {
         "parent": {
           "id": "t@m46p",
-          "title": "Automate the Access application development workflow",
+          "title": "Automate the Access development workflow",
           "status": "ready",
           "priority_text": "9"
         },
         "children": [
           {
             "id": "t@4ms7",
-            "title": "Implement Export-AccessSource",
+            "title": "Export Access source safely",
             "status": "blocked",
             "priority_text": "1"
           },
           {
             "id": "t@edrm",
-            "title": "Implement Package-AccessTransfer",
+            "title": "Package an Access build for transfer",
             "status": "blocked",
             "priority_text": "2"
           },
           {
             "id": "t@t1op",
-            "title": "Implement Test-AccessCandidate",
+            "title": "Test an Access build candidate",
             "status": "blocked",
             "priority_text": "2"
           },
           {
             "id": "t@u5rj",
-            "title": "Implement Build-AccessCandidate",
+            "title": "Build a disposable Access database candidate",
             "status": "blocked",
             "priority_text": "2"
           }
@@ -847,7 +847,7 @@
     },
     {
       "id": "t@m46p",
-      "title": "Automate the Access application development workflow",
+      "title": "Automate the Access development workflow",
       "body_markdown": "",
       "created_at": "2026-09-19T09:50:28.695Z",
       "completed_at": null,
@@ -858,37 +858,37 @@
       "priority_text": "9",
       "type": "FEATURE",
       "status": "ready",
-      "filename": "t@m46p, p9, FEATURE, Automate the Access application development workflow.md",
+      "filename": "t@m46p, p9, FEATURE, Automate the Access development workflow.md",
       "relationships": {
         "parent": null,
         "children": [
           {
             "id": "t@2cio",
-            "title": "Document the interim Git snapshot plus baseline ACCDB workflow",
+            "title": "Document the temporary baseline database workflow",
             "status": "ready",
             "priority_text": "1"
           },
           {
             "id": "t@9jpt",
-            "title": "Define the W drive Access artifact exchange protocol",
+            "title": "Define how computers exchange Access build packages",
             "status": "ready",
             "priority_text": "1"
           },
           {
             "id": "t@goz4",
-            "title": "Harden Access source export and import",
+            "title": "Make Access source export and import reliable",
             "status": "ready",
             "priority_text": "8"
           },
           {
             "id": "t@q3b3",
-            "title": "Publish the three validated local commits to origin main",
+            "title": "Publish validated local commits to the shared branch",
             "status": "ready",
             "priority_text": "0"
           },
           {
             "id": "t@ypov",
-            "title": "Build the Access development automation command suite",
+            "title": "Create one command suite for the Access workflow",
             "status": "ready",
             "priority_text": "8"
           }
