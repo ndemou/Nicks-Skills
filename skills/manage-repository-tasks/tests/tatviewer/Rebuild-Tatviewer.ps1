@@ -25,17 +25,19 @@ if (-not (Test-Path -LiteralPath $cargoPath -PathType Leaf)) {
 
 Push-Location -LiteralPath $skillPath
 try {
-    & $cargoPath build --release --bin tatviewer
+    & $cargoPath build --release --locked --bin tat --bin tatviewer
     if ($LASTEXITCODE -ne 0) {
-        throw "The tatviewer release build failed with exit code $LASTEXITCODE."
+        throw "The tat and tatviewer release build failed with exit code $LASTEXITCODE."
     }
 
-    $releasePath = Join-Path $skillPath 'target\release\tatviewer.exe'
-    $bundledPath = Join-Path $skillPath 'tatviewer.exe'
-    if (-not (Test-Path -LiteralPath $releasePath -PathType Leaf)) {
-        throw "The release build did not create $releasePath."
+    foreach ($name in @('tat', 'tatviewer')) {
+        $releasePath = Join-Path $skillPath "target\release\$name.exe"
+        $bundledPath = Join-Path $skillPath "$name.exe"
+        if (-not (Test-Path -LiteralPath $releasePath -PathType Leaf)) {
+            throw "The release build did not create $releasePath."
+        }
+        Copy-Item -LiteralPath $releasePath -Destination $bundledPath -Force
     }
-    Copy-Item -LiteralPath $releasePath -Destination $bundledPath -Force
 
     & (Join-Path $PSScriptRoot 'Generate-TatviewerOutput.ps1')
     if ($LASTEXITCODE -ne 0) {

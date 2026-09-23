@@ -10,6 +10,18 @@ Do not operate on task files manually when `tat` supports the operation (e.g. co
 
 The binary is fully self-documenting. Run `tat --help` for basic help, `tat help <command>` for command-specific help, `tat guide` for orientation and the recommended workflow, or `tat reference` for the complete reference manual.
 
+Enable Tab completion for the current shell:
+
+```powershell
+tat completions powershell | Out-String | Invoke-Expression
+```
+
+```bash
+source <(tat completions bash)
+```
+
+Add the appropriate line to your PowerShell profile or Bash startup file to enable it in future sessions. Completion suggests commands, aliases, options, fixed values, and IDs from the current repository. PowerShell shows each suggested ID's title, status, and priority; Bash inserts the ID. `done` suggests not-done IDs and `reopen` suggests done IDs. Task suggestions require a valid repository and are read-only. File arguments use the shell's path completion. Use `tat completions <shell> --static` to print Clap's static completion script without repository-aware suggestions.
+
 Task types, list modes and their aliases, and `--color` values are case-insensitive. For example, `--type BUG`, `--type Bug`, and `--type bug` all select `BUG`; filenames and JSON retain canonical values.
 
 ## Use the task model
@@ -127,7 +139,7 @@ There are two report presets. `tatviewer` starts with READY, BLOCKED, and RECENT
 
 With no output path, `tatviewer` creates a unique temporary HTML file and prints its absolute path. It refuses to replace an existing explicit output unless `--force` is supplied. `tatviewer` owns Mermaid generation: it reads the complete validated model from `tat list all --json`, then limits the diagram to READY, BLOCKED, and RECENTLY DONE tasks. OLD DONE tasks never appear in the diagram, including in a `--all` report, although `--all` still includes their cards. `tat.exe` has no `graph`/`deps` command.
 
-Rebuild the bundled `tatviewer.exe` with `tests/tatviewer/Rebuild-Tatviewer.ps1`. The script compiles the release binary, copies it into the skill directory, validates the complex task fixture, and regenerates `tests/tatviewer/tatviewer-output.html`. Do not replace the bundled viewer through another build command because that would skip the fixture output.
+Rebuild the bundled `tat.exe` and `tatviewer.exe` with `tests/tatviewer/Rebuild-Tatviewer.ps1`. The script compiles both release binaries, copies them into the skill directory, validates the complex task fixture, and regenerates `tests/tatviewer/tatviewer-output.html`. Use this script for bundled binary updates so the pair and fixture output stay in sync.
 
 The sticky header uses two compact logical lines. The first contains the inverted tree button, `TAT DASHBOARD`, the repository name at the same size as issue-card titles, status filters, type filters, a search control that expands from its icon when focused, and a minimal monochrome reset icon. Status and type filters share the same rounded-rectangle styling rather than pill shapes. This toolbar and its filter groups wrap whenever needed to stay within the page width. The second logical line contains only the live result count.
 

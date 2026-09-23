@@ -1098,6 +1098,7 @@ fn help_orients_new_users_and_solves_command_specific_questions() {
         "tat help <COMMAND>    More detailed help for a particular command",
         "tat guide             Orientation and recommended workflow (How To)",
         "tat reference         The reference manual",
+        "tat completions <SHELL>  Enable Bash or PowerShell Tab completion",
         "      --color <COLOR>  Control ANSI colors: [default: auto] [possible values: auto, always, never]",
         "  -h, --help           Print help",
         "  -V, --version        Print version",
@@ -1191,12 +1192,16 @@ fn help_orients_new_users_and_solves_command_specific_questions() {
         ("guide", "Orientation and recommended workflow (How To)"),
         ("reference", "The reference manual"),
         (
+            "completions",
+            "Print a Bash or PowerShell completion script",
+        ),
+        (
             "help",
             "Print this message or the help of the given subcommand(s)",
         ),
     ];
     for (command, description) in command_rows {
-        let expected = format!("  {command:<9}  {description}");
+        let expected = format!("  {command:<11}  {description}");
         assert!(
             short_help.lines().any(|line| line == expected),
             "compact -h omitted row {expected:?}\n{short_help}"
@@ -1204,6 +1209,76 @@ fn help_orients_new_users_and_solves_command_specific_questions() {
     }
     assert!(!short_help.contains("Commands:\n  new\n"));
     assert!(!short_help.contains("\n  graph"));
+}
+
+#[test]
+fn shell_completion_suggests_current_repository_tasks_and_preserves_static_generation() {
+    let repo = repository();
+    let work = id_from_path(&created_path(repo.path(), &["new", "Write the parser"]));
+    let blocker = id_from_path(&created_path(
+        repo.path(),
+        &["new", "Approve the parser", "--blocks", &work],
+    ));
+    let finished = id_from_path(&created_path(repo.path(), &["new", "Finished task"]));
+    success(repo.path(), &["done", &finished]);
+
+    let bash = success(repo.path(), &["completions", "bash"]);
+    assert!(bash.contains("complete -o default"));
+    assert!(bash.contains("__complete"));
+    let powershell = success(repo.path(), &["completions", "powershell"]);
+    assert!(powershell.contains("Register-ArgumentCompleter -Native"));
+    assert!(powershell.contains("__complete"));
+    let static_bash = success(repo.path(), &["completions", "bash", "--static"]);
+    assert!(static_bash.contains("complete -F"));
+    assert!(!static_bash.contains("__complete"));
+    let static_powershell = success(repo.path(), &["completions", "powershell", "--static"]);
+    assert!(static_powershell.contains("Register-ArgumentCompleter"));
+    assert!(!static_powershell.contains("__complete"));
+
+    let commands = success(repo.path(), &["__complete", "--", "tat", "se"]);
+    assert!(commands.contains("set\t"));
+    let help_commands = success(repo.path(), &["__complete", "--", "tat", "help", "se"]);
+    assert!(help_commands.contains("set\t"));
+    let options = success(
+        repo.path(),
+        &["__complete", "--", "tat", "set", &work, "--t"],
+    );
+    assert!(options.contains("--type\t"));
+    let trailing_options = success(repo.path(), &["__complete", "--", "tat", "view", &work, ""]);
+    assert!(trailing_options.contains("--filename\t"));
+    let types = success(
+        repo.path(),
+        &["__complete", "--", "tat", "set", &work, "--type", "f"],
+    );
+    assert!(types.contains("feature\t"));
+    let modes = success(repo.path(), &["__complete", "--", "tat", "list", "b"]);
+    assert!(modes.contains("blocked\t"));
+
+    let done_ids = success(repo.path(), &["__complete", "--", "tat", "done", "t@"]);
+    assert!(done_ids.contains(&format!("{work}\tWrite the parser · blocked · P5")));
+    assert!(done_ids.contains(&blocker));
+    assert!(!done_ids.contains(&finished));
+    let reopen_ids = success(repo.path(), &["__complete", "--", "tat", "open", "t@"]);
+    assert!(reopen_ids.contains(&finished));
+    assert!(!reopen_ids.contains(&work));
+    let parent_ids = success(
+        repo.path(),
+        &["__complete", "--", "tat", "set", &work, "--parent", "t@"],
+    );
+    assert!(parent_ids.contains(&blocker));
+    let list_ids = success(
+        repo.path(),
+        &[
+            "__complete",
+            "--",
+            "tat",
+            "set",
+            &work,
+            "--blocks",
+            &format!("{blocker},t@"),
+        ],
+    );
+    assert!(list_ids.contains(&format!("{blocker},{work}\t")));
 }
 
 #[test]
@@ -1239,8 +1314,8 @@ fn colors_help_guides_tables_and_filenames_only_when_requested_for_captured_outp
 
     let colored_help = success(repo.path(), &["--color", "always", "--help"]);
     assert!(colored_help.contains("\x1b[1;36mUsage:"));
-    assert!(colored_help.contains("  \x1b[1;32mnew\x1b[0m        Create a new task"));
-    assert!(colored_help.contains("  \x1b[1;32mcheck\x1b[0m      Validate filenames"));
+    assert!(colored_help.contains("  \x1b[1;32mnew\x1b[0m          Create a new task"));
+    assert!(colored_help.contains("  \x1b[1;32mcheck\x1b[0m        Validate filenames"));
     let colored_reference = success(repo.path(), &["--color", "always", "reference"]);
     assert!(colored_reference.contains("\x1b[1;36mDEPENDENCIES AND READINESS\x1b[0m"));
     assert!(colored_reference.contains("\x1b[33mtat new \"Gate\" --blocks t@work\x1b[0m"));

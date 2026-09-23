@@ -1,4 +1,8 @@
-use clap::{ArgAction, Args, CommandFactory, FromArgMatches, Parser, Subcommand, ValueEnum};
+mod completion;
+
+use clap::{
+    ArgAction, Args, CommandFactory, FromArgMatches, Parser, Subcommand, ValueEnum, ValueHint,
+};
 use rand::Rng;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
@@ -72,7 +76,8 @@ FIND THE RIGHT COMMAND
 LEARN AND TROUBLESHOOT
   tat help <COMMAND>    More detailed help for a particular command
   tat guide             Orientation and recommended workflow (How To)
-  tat reference         The reference manual"#;
+  tat reference         The reference manual
+  tat completions <SHELL>  Enable Bash or PowerShell Tab completion"#;
 
 const NEW_HELP: &str = r#"BEHAVIOR
   Creates tasks/ and tasks/done/ when needed, validates existing records and
@@ -524,6 +529,13 @@ Use `tat list ready`, `tat list blocked`, and `tatviewer` to verify the result."
 
 const GUIDE_AUTOMATION: &str = r#"AUTOMATION CONTRACT
 
+SHELL COMPLETION
+  Source `tat completions bash` in Bash, or evaluate the output of
+  `tat completions powershell` in PowerShell. Add that command to the shell's
+  startup file for future sessions. Completion suggests commands, options,
+  fixed values, and live task IDs in a valid repository. Use --static to print
+  Clap's static completion script instead. Completion never changes task files.
+
 PROCESS CONTRACT
   Exit 0    Command, --help, or --version succeeded.
   Exit 1    Repository/task validation or requested operation failed.
@@ -561,6 +573,7 @@ SUCCESSFUL STDOUT
   view                Markdown document, or basename with --filename
   remove              `removed <path>`
   check               `OK: <N> not-done, <N> done task(s)`
+  completions         Shell registration script (Bash or PowerShell)
   guide / reference   Documentation (styled on terminals, plain when redirected)
 
 FAILURE AND MUTATION ORDER
@@ -847,6 +860,25 @@ enum Commands {
     /// The reference manual.
     #[command(after_help = REFERENCE_HELP)]
     Reference,
+    /// Print a Bash or PowerShell completion script.
+    Completions(CompletionArgs),
+}
+
+#[derive(Clone, Copy, Debug, ValueEnum)]
+enum CompletionShell {
+    Bash,
+    #[value(name = "powershell", alias = "power-shell")]
+    PowerShell,
+}
+
+#[derive(Args, Debug)]
+struct CompletionArgs {
+    /// Shell whose completion script should be printed.
+    #[arg(value_enum)]
+    shell: CompletionShell,
+    /// Print the static Clap script without repository task suggestions.
+    #[arg(long = "static")]
+    static_only: bool,
 }
 
 #[derive(Args, Debug)]
@@ -876,7 +908,7 @@ struct NewArgs {
     #[arg(long, conflicts_with = "body_file")]
     body: Option<String>,
     /// Read the Markdown body from a file.
-    #[arg(long, value_name = "PATH", conflicts_with = "body")]
+    #[arg(long, value_name = "PATH", value_hint = ValueHint::FilePath, conflicts_with = "body")]
     body_file: Option<PathBuf>,
 }
 
@@ -950,6 +982,7 @@ struct DoneArgs {
     #[arg(
         long,
         value_name = "PATH",
+        value_hint = ValueHint::FilePath,
         visible_aliases = ["done-notes-file", "notes-file"],
         conflicts_with = "completion_notes"
     )]
@@ -959,7 +992,7 @@ struct DoneArgs {
 #[derive(Args, Debug)]
 struct TaskFileArgs {
     /// Canonical task filename or path whose basename is a task filename.
-    #[arg(value_name = "PATH_OR_FILENAME")]
+    #[arg(value_name = "PATH_OR_FILENAME", value_hint = ValueHint::AnyPath)]
     path: PathBuf,
 }
 
@@ -1003,7 +1036,7 @@ struct SetArgs {
     #[arg(long, conflicts_with = "body_file")]
     body: Option<String>,
     /// Replace the Markdown body from a file.
-    #[arg(long, value_name = "PATH", conflicts_with = "body")]
+    #[arg(long, value_name = "PATH", value_hint = ValueHint::FilePath, conflicts_with = "body")]
     body_file: Option<PathBuf>,
 }
 
@@ -1130,6 +1163,22 @@ struct Repository {
 
 fn main() -> ExitCode {
     let mut arguments = std::env::args_os().collect::<Vec<_>>();
+    if arguments
+        .get(1)
+        .is_some_and(|argument| argument == "__complete")
+    {
+        if arguments.get(2).is_none_or(|argument| argument != "--") {
+            return ExitCode::from(2);
+        }
+        let words = arguments[3..]
+            .iter()
+            .map(|argument| argument.to_string_lossy().into_owned())
+            .collect::<Vec<_>>();
+        return match completion::print_candidates(&words) {
+            Ok(()) => ExitCode::SUCCESS,
+            Err(_) => ExitCode::FAILURE,
+        };
+    }
     if arguments.len() == 2 && (arguments[1] == "help" || arguments[1] == "--help") {
         arguments[1] = OsString::from("-h");
     }
@@ -1181,6 +1230,7 @@ fn command_name(command: &Commands) -> &'static str {
         Commands::Check => "check",
         Commands::Guide => "guide",
         Commands::Reference => "reference",
+        Commands::Completions(_) => "completions",
     }
 }
 
@@ -1198,6 +1248,7 @@ fn run(cli: Cli) -> AppResult<()> {
         Commands::Check => command_check(),
         Commands::Guide => command_guide(),
         Commands::Reference => command_reference(),
+        Commands::Completions(args) => completion::print_script(args),
     }
 }
 
@@ -2999,6 +3050,7 @@ fn is_help_command_entry(value: &str) -> bool {
             | "validate"
             | "guide"
             | "reference"
+            | "completions"
             | "help"
     )
 }
@@ -3063,6 +3115,7 @@ fn is_document_example(value: &str) -> bool {
                     | "validate"
                     | "check"
                     | "guide"
+                    | "completions"
                     | "help"
             )
         });

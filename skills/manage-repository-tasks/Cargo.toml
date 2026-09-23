@@ -6,6 +6,7 @@ description = "Repository-local Markdown task manager"
 
 [dependencies]
 clap = { version = "4.5", default-features = false, features = ["cargo", "derive", "error-context", "help", "std", "suggestions", "usage"] }
+clap_complete = "4.5"
 rand = "0.9"
 regex = "1.11"
 serde = { version = "1.0", features = ["derive"] }
