@@ -1,3 +1,0 @@
-interface:
-  display_name: "Master Controller"
-  short_description: "Run scripts or deploy the paired worker runner"
